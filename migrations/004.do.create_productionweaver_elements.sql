@@ -26,6 +26,6 @@ CREATE TABLE productionweaver_elements (
     category element_category NOT NULL,
     description TEXT NOT NULL,
     date_created TIMESTAMP NOT NULL DEFAULT now(),
-    production_id INTEGER NOT NULL REFERENCES productionweaver_productions(id),
-    scene_id INTEGER NOT NULL REFERENCES productionweaver_scenes(id)
+    production_id INTEGER NOT NULL REFERENCES productionweaver_productions(id) ON DELETE CASCADE,
+    scene_id INTEGER NOT NULL REFERENCES productionweaver_scenes(id) ON DELETE CASCADE
 );
