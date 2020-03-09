@@ -21,6 +21,9 @@ describe.only('Users endpoint', function () {
     //Remove data from users table before all tests in this file.
     before('clean the tables', () => helpers.cleanTables(db))
 
+    //Remove data from users table after each test in this block
+    afterEach('clean the tables', () => helpers.cleanTables(db))
+
     describe('GET /api/users', () => {
         //Tests for when there aren't users in the db
         context('given there are no users in the database', () => {
@@ -87,6 +90,23 @@ describe.only('Users endpoint', function () {
                 return supertest(app)
                     .get('/api/users/')
                     .expect(200, testUsers)
+            })
+
+            context('given an XSS attack', () => {
+                it('removes XSS attack', () => {
+                    return supertest(app)
+                        .get('/api/users')
+                        .expect(200)
+                        .expect(res => {
+                            expect(res.body[0].id).to.eql(testUsers[0].id)
+                            expect(res.body[0].first_name).to.eql(testUsers[0].first_name)
+                            expect(res.body[0].last_name).to.eql(testUsers[0].last_name)
+                            expect(res.body[0].email).to.eql(testUsers[0].email)
+                            expect(res.body[0].password).to.eql(testUsers[0].password)
+                            expect(res.body[0].date_created).to.eql(testUsers[0].date_created)
+                        })
+                })
+
             })
         })
     })
