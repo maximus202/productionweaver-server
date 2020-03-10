@@ -107,7 +107,6 @@ describe.only('Users endpoint', function () {
                             expect(res.body[0].date_created).to.eql(testUsers[0].date_created)
                         })
                 })
-
             })
         })
     })
@@ -143,10 +142,23 @@ describe.only('Users endpoint', function () {
                     .get(`/api/users/${user_id}`)
                     .expect(200, testUsers[0])
             })
-        })
 
-        context('given an XSS attack', () => {
-
+            context('given an XSS attack', () => {
+                it('removes XSS attack', () => {
+                    const user_id = 1
+                    return supertest(app)
+                        .get(`/api/users/${user_id}`)
+                        .expect(res => {
+                            console.log(res.body)
+                            expect(res.body.id).to.eql(testUsers[0].id)
+                            expect(res.body.first_name).to.eql(testUsers[0].first_name)
+                            expect(res.body.last_name).to.eql(testUsers[0].last_name)
+                            expect(res.body.email).to.eql(testUsers[0].email)
+                            expect(res.body.password).to.eql(testUsers[0].password)
+                            expect(res.body.date_created).to.eql(testUsers[0].date_created)
+                        })
+                })
+            })
         })
     })
 })
