@@ -11,6 +11,15 @@ const UsersService = {
             .where('id', user_id)
             .first()
     },
+    insertNewUser(knex, newUser) {
+        return knex
+            .insert(newUser)
+            .into('productionweaver_users')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
+    },
 };
 
 module.exports = UsersService

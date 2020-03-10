@@ -50,6 +50,54 @@ describe.only('Users endpoint', function () {
         },
     ];
 
+    const maliciousUser = {
+        id: 1,
+        first_name: 'Malicious first name <script>alert("xss");</script>',
+        last_name: 'Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
+        email: 'email@kasdfoandf.com',
+        password: 'helloimfriendly',
+        date_created: new Date().toISOString()
+    }
+
+    const sanitizedMaliciousUser = {
+        id: 1,
+        first_name: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
+        last_name: 'Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
+        email: 'email@kasdfoandf.com',
+        password: 'helloimfriendly'
+    }
+
+    const userWithMissingFirstName = {
+        last_name: 'Howard',
+        email: 'rhoward@studio.com',
+        password: 'ladyinthewater'
+    }
+
+    const userwithMissingLastName = {
+        first_name: 'Frank',
+        email: 'fmiller@studio.com',
+        password: 'madmax'
+    }
+
+    const userwithMissingEmail = {
+        first_name: 'Todd',
+        last_name: 'Phillips',
+        password: 'joker'
+    }
+
+    const userWithMissingPassword = {
+        first_name: 'Christopher',
+        last_name: 'Nolan',
+        email: 'cnolan@studio.com',
+    }
+
+    const newUser = {
+        first_name: 'Leigh',
+        last_name: 'Wannell',
+        email: 'lwannell@studio.com',
+        password: 'upgrade'
+    }
+
     //Make Knex instance before all tests in this file.
     before('make Knex instance', () => {
         db = knex({
@@ -89,7 +137,7 @@ describe.only('Users endpoint', function () {
 
             it('responds with 200 and all users', () => {
                 return supertest(app)
-                    .get('/api/users/')
+                    .get('/api/users')
                     .expect(200, testUsers)
             })
 
@@ -149,7 +197,6 @@ describe.only('Users endpoint', function () {
                     return supertest(app)
                         .get(`/api/users/${user_id}`)
                         .expect(res => {
-                            console.log(res.body)
                             expect(res.body.id).to.eql(testUsers[0].id)
                             expect(res.body.first_name).to.eql(testUsers[0].first_name)
                             expect(res.body.last_name).to.eql(testUsers[0].last_name)
@@ -158,6 +205,71 @@ describe.only('Users endpoint', function () {
                             expect(res.body.date_created).to.eql(testUsers[0].date_created)
                         })
                 })
+            })
+        })
+    })
+
+    describe('POST /api/users', () => {
+        context('missing fields', () => {
+            it('responds with 400 if first name is missing', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send(userWithMissingFirstName)
+                    .expect(400, {
+                        error: {
+                            message: `first_name missing in request body`
+                        }
+                    })
+
+            })
+            it('responds with 400 if last name is missing', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send(userwithMissingLastName)
+                    .expect(400, { error: { message: 'last_name missing in request body' } })
+            })
+            it('responds with 400 if email is missing', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send(userwithMissingEmail)
+                    .expect(400, { error: { message: 'email missing in request body' } })
+            })
+            it('responds with 400 if password is missing', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send(userWithMissingPassword)
+                    .expect(400, { error: { message: 'password missing in request body' } })
+            })
+        })
+
+        context('valid credentials', () => {
+            it('responds with 201 and new user', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send(newUser)
+                    .expect(201)
+                    .then(res => {
+                        expect(res.body.first_name).to.eql(newUser.first_name)
+                        expect(res.body.last_name).to.eql(newUser.last_name)
+                        expect(res.body.email).to.eql(newUser.email)
+                        expect(res.body.password).to.eql(newUser.password)
+                    })
+            })
+        })
+
+        context('XSS attack', () => {
+            it('removes XSS attack', () => {
+                return supertest(app)
+                    .post('/api/users')
+                    .send(maliciousUser)
+                    .expect(201)
+                    .then(res => {
+                        expect(res.body.id).to.eql(sanitizedMaliciousUser.id)
+                        expect(res.body.first_name).to.eql(sanitizedMaliciousUser.first_name)
+                        expect(res.body.last_name).to.eql(sanitizedMaliciousUser.last_name)
+                        expect(res.body.email).to.eql(sanitizedMaliciousUser.email)
+                        expect(res.body.password).to.eql(sanitizedMaliciousUser.password)
+                    })
             })
         })
     })

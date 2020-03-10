@@ -25,6 +25,31 @@ usersRouter
             })
             .catch(next)
     })
+    .post(jsonParser, (req, res, next) => {
+        const { first_name, last_name, email, password } = req.body
+        const newUser = { first_name, last_name, email, password }
+        console.log(newUser)
+
+        for (const [key, value] of Object.entries(newUser)) {
+            if (value == null) {
+                return res.status(400).json({
+                    error: {
+                        message: `${key} missing in request body`
+                    }
+                })
+            }
+        }
+
+        const knexInstance = req.app.get('db')
+        UsersService.insertNewUser(knexInstance, newUser)
+            .then(user => {
+                res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${user.id}`))
+                    .json(serializeUser(user))
+            })
+            .catch(next)
+    })
 
 usersRouter
     .route('/:user_id')
