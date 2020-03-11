@@ -21,10 +21,14 @@ const UsersService = {
             })
     },
     updateUser(knex, id, updatedUser) {
-        console.log(updatedUser)
         return knex('productionweaver_users')
             .where({ id })
             .update(updatedUser)
+    },
+    deleteUser(knex, id) {
+        return knex('productionweaver_users')
+            .where({ id })
+            .delete()
     },
 };
 

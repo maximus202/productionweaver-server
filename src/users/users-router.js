@@ -93,5 +93,19 @@ usersRouter
             })
             .catch(next)
     })
+    .delete((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        UsersService.deleteUser(knexInstance, req.params.user_id)
+            .then(rowsAffected => {
+                res
+                    .status(200)
+                    .json({
+                        success: {
+                            message: 'User successfully deleted'
+                        }
+                    })
+            })
+            .catch(next)
+    })
 
 module.exports = usersRouter

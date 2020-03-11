@@ -309,4 +309,24 @@ describe.only('Users endpoint', function () {
             })
         })
     })
+
+    describe('DELETE /api/users/:user_id', () => {
+        beforeEach('insert users', () => {
+            return db
+                .into('productionweaver_users')
+                .insert(testUsers)
+        })
+
+        context('User exists and request is successful', () => {
+            it('responds with 200 and success message', () => {
+                const user_id = testUsers[0].id
+                return supertest(app)
+                    .delete(`/api/users/${user_id}`)
+                    .expect(200)
+                    .expect(res => {
+                        expect(res.body.success.message).to.eql('User successfully deleted')
+                    })
+            })
+        })
+    })
 })
