@@ -98,6 +98,13 @@ describe.only('Users endpoint', function () {
         password: 'upgrade'
     }
 
+    const updateUserWithMissingFields = {}
+
+    const updateUser = {
+        first_name: 'Kevyn',
+        last_name: 'Feige'
+    }
+
     //Make Knex instance before all tests in this file.
     before('make Knex instance', () => {
         db = knex({
@@ -270,6 +277,35 @@ describe.only('Users endpoint', function () {
                         expect(res.body.email).to.eql(sanitizedMaliciousUser.email)
                         expect(res.body.password).to.eql(sanitizedMaliciousUser.password)
                     })
+            })
+        })
+    })
+
+    describe('PATCH /api/users', () => {
+        //Inserts testUsers into users table before each test in this context block
+        beforeEach('insert users', () => {
+            return db
+                .into('productionweaver_users')
+                .insert(testUsers)
+        })
+
+        context('User exists and first_name and last_name are missing', () => {
+            it('responds with 404 not found', () => {
+                const user_id = testUsers[0].id
+                return supertest(app)
+                    .patch(`/api/users/${user_id}`)
+                    .send(updateUserWithMissingFields)
+                    .expect(400)
+            })
+        })
+
+        context('User exists and first_name and last_name are present', () => {
+            it('responds with 204', () => {
+                const user_id = testUsers[0].id
+                return supertest(app)
+                    .patch(`/api/users/${user_id}`)
+                    .send(updateUser)
+                    .expect(204)
             })
         })
     })

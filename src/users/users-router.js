@@ -28,7 +28,6 @@ usersRouter
     .post(jsonParser, (req, res, next) => {
         const { first_name, last_name, email, password } = req.body
         const newUser = { first_name, last_name, email, password }
-        console.log(newUser)
 
         for (const [key, value] of Object.entries(newUser)) {
             if (value == null) {
@@ -71,6 +70,28 @@ usersRouter
     })
     .get((req, res, next) => {
         res.json(serializeUser(res.user))
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { first_name, last_name } = req.body
+        const updatedUser = { first_name, last_name }
+
+        const numberOfValues = Object.values(updatedUser).filter(Boolean).length
+        if (numberOfValues === 0) {
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain first_name or last_name`
+                }
+            })
+        }
+
+        const knexInstance = req.app.get('db')
+        UsersService.updateUser(knexInstance, req.params.user_id, updatedUser)
+            .then(user => {
+                res
+                    .status(204)
+                    .end()
+            })
+            .catch(next)
     })
 
 module.exports = usersRouter

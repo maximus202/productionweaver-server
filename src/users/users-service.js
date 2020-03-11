@@ -20,6 +20,12 @@ const UsersService = {
                 return rows[0]
             })
     },
+    updateUser(knex, id, updatedUser) {
+        console.log(updatedUser)
+        return knex('productionweaver_users')
+            .where({ id })
+            .update(updatedUser)
+    },
 };
 
 module.exports = UsersService
