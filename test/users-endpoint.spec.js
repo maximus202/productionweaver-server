@@ -56,7 +56,7 @@ describe('Users endpoint', function () {
         last_name: 'Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
         email: 'email@kasdfoandf.com',
         password: 'helloimfriendly',
-        date_created: new Date().toISOString()
+        date_created: '1999-07-02T16:28:32.615Z'
     }
 
     const sanitizedMaliciousUser = {
@@ -64,7 +64,8 @@ describe('Users endpoint', function () {
         first_name: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
         last_name: 'Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
         email: 'email@kasdfoandf.com',
-        password: 'helloimfriendly'
+        password: 'helloimfriendly',
+        date_created: '1999-07-02T16:28:32.615Z'
     }
 
     const userWithMissingFirstName = {
@@ -147,21 +148,26 @@ describe('Users endpoint', function () {
                     .get('/api/users')
                     .expect(200, testUsers)
             })
+        })
 
-            context('given an XSS attack', () => {
-                it('removes XSS attack', () => {
-                    return supertest(app)
-                        .get('/api/users')
-                        .expect(200)
-                        .expect(res => {
-                            expect(res.body[0].id).to.eql(testUsers[0].id)
-                            expect(res.body[0].first_name).to.eql(testUsers[0].first_name)
-                            expect(res.body[0].last_name).to.eql(testUsers[0].last_name)
-                            expect(res.body[0].email).to.eql(testUsers[0].email)
-                            expect(res.body[0].password).to.eql(testUsers[0].password)
-                            expect(res.body[0].date_created).to.eql(testUsers[0].date_created)
-                        })
-                })
+        context('given an XSS attack', () => {
+            beforeEach('insert malicious user', () => {
+                return db
+                    .into('productionweaver_users')
+                    .insert(maliciousUser)
+            })
+            it('removes XSS attack', () => {
+                return supertest(app)
+                    .get('/api/users')
+                    .expect(200)
+                    .expect(res => {
+                        expect(res.body[0].id).to.eql(sanitizedMaliciousUser.id)
+                        expect(res.body[0].first_name).to.eql(sanitizedMaliciousUser.first_name)
+                        expect(res.body[0].last_name).to.eql(sanitizedMaliciousUser.last_name)
+                        expect(res.body[0].email).to.eql(sanitizedMaliciousUser.email)
+                        expect(res.body[0].password).to.eql(sanitizedMaliciousUser.password)
+                        expect(res.body[0].date_created).to.eql(sanitizedMaliciousUser.date_created)
+                    })
             })
         })
     })
@@ -197,27 +203,31 @@ describe('Users endpoint', function () {
                     .get(`/api/users/${user_id}`)
                     .expect(200, testUsers[0])
             })
-
-            context('given an XSS attack', () => {
-                it('removes XSS attack', () => {
-                    const user_id = 1
-                    return supertest(app)
-                        .get(`/api/users/${user_id}`)
-                        .expect(res => {
-                            expect(res.body.id).to.eql(testUsers[0].id)
-                            expect(res.body.first_name).to.eql(testUsers[0].first_name)
-                            expect(res.body.last_name).to.eql(testUsers[0].last_name)
-                            expect(res.body.email).to.eql(testUsers[0].email)
-                            expect(res.body.password).to.eql(testUsers[0].password)
-                            expect(res.body.date_created).to.eql(testUsers[0].date_created)
-                        })
-                })
+        })
+        context('given an XSS attack', () => {
+            beforeEach('insert malicious user', () => {
+                return db
+                    .insert(maliciousUser)
+                    .into('productionweaver_users')
+            })
+            it('removes XSS attack', () => {
+                const user_id = 1
+                return supertest(app)
+                    .get(`/api/users/${user_id}`)
+                    .expect(res => {
+                        expect(res.body.id).to.eql(sanitizedMaliciousUser.id)
+                        expect(res.body.first_name).to.eql(sanitizedMaliciousUser.first_name)
+                        expect(res.body.last_name).to.eql(sanitizedMaliciousUser.last_name)
+                        expect(res.body.email).to.eql(sanitizedMaliciousUser.email)
+                        expect(res.body.password).to.eql(sanitizedMaliciousUser.password)
+                        expect(res.body.date_created).to.eql(sanitizedMaliciousUser.date_created)
+                    })
             })
         })
     })
 
     describe('POST /api/users', () => {
-        context('missing fields', () => {
+        context('given missing fields', () => {
             it('responds with 400 if first name is missing', () => {
                 return supertest(app)
                     .post('/api/users')
@@ -249,7 +259,7 @@ describe('Users endpoint', function () {
             })
         })
 
-        context('valid credentials', () => {
+        context('given valid data', () => {
             it('responds with 201 and new user', () => {
                 return supertest(app)
                     .post('/api/users')
@@ -264,7 +274,7 @@ describe('Users endpoint', function () {
             })
         })
 
-        context('XSS attack', () => {
+        context('given XSS attack', () => {
             it('removes XSS attack', () => {
                 return supertest(app)
                     .post('/api/users')
