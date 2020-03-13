@@ -53,7 +53,7 @@ describe('Productions endpoint', () => {
             production_title: 'Avengers: Endgame',
             date_created: '2009-01-22T16:28:32.615Z',
             owner: 3
-        }
+        },
     ]
 
     //Malicious production for testing xss attacks
@@ -68,6 +68,18 @@ describe('Productions endpoint', () => {
     const sanitizedMaliciousProduction = {
         id: 1,
         production_title: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
+        owner: 1
+    }
+
+    //new productions
+    const newProductionWithNoTitle = {
+        owner: 1
+    }
+    const newProductionWithNoOwner = {
+        production_title: 'Movie with no owner'
+    }
+    const validNewProduction = {
+        production_title: 'Taxi Driver 2',
         owner: 1
     }
 
@@ -137,6 +149,49 @@ describe('Productions endpoint', () => {
                         expect(res.body[0].owner).to.eql(testProductions[0].owner)
                     })
             })
+        })
+    })
+
+    describe('POST /api/productions', () => {
+        context('given fields are missing', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .insert(testUsers)
+                    .into('productionweaver_users')
+            })
+
+            it('responds with 400 and an error message when production_title is missing', () => {
+                return supertest(app)
+                    .post('/api/productions/')
+                    .send(newProductionWithNoTitle)
+                    .expect(400, { error: { message: 'production_title missing in request body' } })
+            })
+            it('responds with 400 and an error message when owner is missing', () => {
+                return supertest(app)
+                    .post('/api/productions/')
+                    .send(newProductionWithNoOwner)
+                    .expect(400, { error: { message: 'owner missing in request body' } })
+            })
+        })
+        context('given a valid request', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .insert(testUsers)
+                    .into('productionweaver_users')
+            })
+            it('responds with 201 and the new production', () => {
+                return supertest(app)
+                    .post('/api/productions')
+                    .send(validNewProduction)
+                    .expect(201)
+                    .expect(res => {
+                        expect(res.body.production_title).to.eql(validNewProduction.production_title)
+                        expect(res.body.owner).to.eql(validNewProduction.owner)
+                    })
+            })
+        })
+        context('given an XSS attack', () => {
+
         })
     })
 })

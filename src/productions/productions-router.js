@@ -26,5 +26,29 @@ productionsRouter
             })
             .catch(next)
     })
+    .post(jsonParser, (req, res, next) => {
+        const { production_title, owner } = req.body
+        const newProduction = { production_title, owner }
+
+        for (const [key, value] of Object.entries(newProduction)) {
+            if (value == null) {
+                return res.status(400).json({
+                    error: {
+                        message: `${key} missing in request body`
+                    }
+                })
+            }
+        }
+
+        const knexInstance = req.app.get('db')
+        ProductionsService.insertProduction(knexInstance, newProduction)
+            .then(production => {
+                return res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${production.id}`))
+                    .json(serializeProduction(production))
+            })
+            .catch(next)
+    })
 
 module.exports = productionsRouter
