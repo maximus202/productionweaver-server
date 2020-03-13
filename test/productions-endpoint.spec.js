@@ -60,7 +60,7 @@ describe('Productions endpoint', () => {
     const maliciousProduction = {
         id: 1,
         production_title: 'Malicious first name <script>alert("xss");</script> Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
-        date_created: new Date().toISOString(),
+        date_created: '2009-01-22T16:28:32.615Z',
         owner: 1
     }
 
@@ -68,6 +68,7 @@ describe('Productions endpoint', () => {
     const sanitizedMaliciousProduction = {
         id: 1,
         production_title: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
+        date_created: '2009-01-22T16:28:32.615Z',
         owner: 1
     }
 
@@ -136,17 +137,17 @@ describe('Productions endpoint', () => {
             beforeEach('insert productions', () => {
                 return db
                     .into('productionweaver_productions')
-                    .insert(testProductions)
+                    .insert(maliciousProduction)
             })
             it('removes XSS attack', () => {
                 return supertest(app)
                     .get('/api/productions')
                     .expect(200)
                     .expect(res => {
-                        expect(res.body[0].id).to.eql(testProductions[0].id)
-                        expect(res.body[0].production_title).to.eql(testProductions[0].production_title)
-                        expect(res.body[0].date_created).to.eql(testProductions[0].date_created)
-                        expect(res.body[0].owner).to.eql(testProductions[0].owner)
+                        expect(res.body[0].id).to.eql(sanitizedMaliciousProduction.id)
+                        expect(res.body[0].production_title).to.eql(sanitizedMaliciousProduction.production_title)
+                        expect(res.body[0].date_created).to.eql(sanitizedMaliciousProduction.date_created)
+                        expect(res.body[0].owner).to.eql(sanitizedMaliciousProduction.owner)
                     })
             })
         })
@@ -191,7 +192,21 @@ describe('Productions endpoint', () => {
             })
         })
         context('given an XSS attack', () => {
-
+            beforeEach('add users', () => {
+                return db
+                    .insert(testUsers)
+                    .into('productionweaver_users')
+            })
+            it('removes XSS attack', () => {
+                return supertest(app)
+                    .post('/api/productions')
+                    .send(maliciousProduction)
+                    .expect(201)
+                    .expect(res => {
+                        expect(res.body.production_title).to.eql(sanitizedMaliciousProduction.production_title)
+                        expect(res.body.owner).to.eql(sanitizedMaliciousProduction.owner)
+                    })
+            })
         })
     })
 })
