@@ -4,6 +4,15 @@ const ProductionsService = {
             .select('*')
             .from('productionweaver_productions')
     },
+    getById(knex, production_id) {
+        return knex
+            .from('productionweaver_productions')
+            .select('*')
+            .where('id', production_id)
+            .then(row => {
+                return row[0]
+            })
+    },
     insertProduction(knex, newProduction) {
         return knex
             .insert(newProduction)

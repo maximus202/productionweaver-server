@@ -62,7 +62,7 @@ describe('scenes endpoint', () => {
             time_of_day: 'DAY',
             short_summary: 'opening',
             date_created: '1986-01-22T16:28:32.615Z',
-            production_id: 1
+            production_id: "1"
         },
         {
             id: 2,
@@ -71,7 +71,7 @@ describe('scenes endpoint', () => {
             time_of_day: 'DAY',
             short_summary: 'Family arrives at beach.',
             date_created: '1989-01-22T16:28:32.615Z',
-            production_id: 1
+            production_id: "1"
         },
         {
             id: 3,
@@ -80,7 +80,7 @@ describe('scenes endpoint', () => {
             time_of_day: 'DAY',
             short_summary: 'Tina explores the jungle and gets bitten by a strange lizard',
             date_created: '1989-01-22T16:28:32.615Z',
-            production_id: 1
+            production_id: "1"
         },
     ]
 
@@ -104,6 +104,51 @@ describe('scenes endpoint', () => {
         production_id: 1
     }
 
+    const sceneWithoutSetting = {
+        location: 'Jungle Road',
+        time_of_day: 'DAY',
+        short_summary: 'summary'
+    }
+
+    const sceneWithoutLocation = {
+        setting: 'EXT.',
+        time_of_day: 'DAY',
+        short_summary: 'summary'
+    }
+
+    const sceneWithoutTimeOfDay = {
+        setting: 'EXT.',
+        location: 'Jungle Road',
+        short_summary: 'summary'
+    }
+
+    const sceneWithoutSummary = {
+        setting: 'EXT.',
+        location: 'Jungle Road',
+        time_of_day: 'DAY'
+    }
+
+    const insertScene = {
+        setting: 'EXT.',
+        location: 'Jungle Road',
+        time_of_day: 'DAY',
+        short_summary: 'summary',
+    }
+
+    const insertMaliciousScene = {
+        setting: 'EXT.',
+        location: 'Jungle Road',
+        time_of_day: 'DAY',
+        short_summary: 'Malicious first name <script>alert("xss");</script> Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
+    }
+
+    const sanitizedInsertedScene = {
+        setting: 'EXT.',
+        location: 'Jungle Road',
+        time_of_day: 'DAY',
+        short_summary: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
+    }
+
     before('make knex instance', () => {
         db = knex({
             client: 'pg',
@@ -122,10 +167,10 @@ describe('scenes endpoint', () => {
 
     describe('GET /api/scenes', () => {
         context('given scenes do not exist', () => {
-            it('responds with 404 and message', () => {
+            it('responds with 400 and message', () => {
                 return supertest(app)
                     .get('/api/scenes')
-                    .expect(404, { error: { message: 'No scenes found.' } })
+                    .expect(400, { error: { message: 'No scenes found.' } })
             })
         })
         context('given scenes exist', () => {
@@ -172,6 +217,81 @@ describe('scenes endpoint', () => {
                     .expect(200)
                     .expect(res => {
                         expect(res.body[0].short_summary).to.eql(sanitizedScene.short_summary)
+                    })
+            })
+        })
+    })
+
+    describe('POST /api/scenes/:production_id', () => {
+        beforeEach('insert testUsers', () => {
+            return db
+                .insert(testUsers)
+                .into('productionweaver_users')
+        })
+        beforeEach('insert testProductions', () => {
+            return db
+                .insert(testProductions)
+                .into('productionweaver_productions')
+        })
+        context('given inputs are missing', () => {
+            it('responds with 400 error and message when setting is missing', () => {
+                return supertest(app)
+                    .post(`/api/scenes/1`)
+                    .send(sceneWithoutSetting)
+                    .expect(400, { error: { message: 'missing input in the request body' } })
+            })
+            it('responds with 400 error and message when location is missing', () => {
+                return supertest(app)
+                    .post(`/api/scenes/1`)
+                    .send(sceneWithoutLocation)
+                    .expect(400, { error: { message: 'missing input in the request body' } })
+            })
+            it('responds with 400 error and message when time of day is missing', () => {
+                return supertest(app)
+                    .post(`/api/scenes/1`)
+                    .send(sceneWithoutTimeOfDay)
+                    .expect(400, { error: { message: 'missing input in the request body' } })
+            })
+            it('responds with 400 error and message when short summary is missing', () => {
+                return supertest(app)
+                    .post(`/api/scenes/1`)
+                    .send(sceneWithoutSummary)
+                    .expect(400, { error: { message: 'missing input in the request body' } })
+            })
+        })
+        context('given production_id is invalid', () => {
+            it('responds with 400 error and message when production_id is missing', () => {
+                return supertest(app)
+                    .post(`/api/scenes/9999`)
+                    .send(insertScene)
+                    .expect(400, { error: { message: 'production_id is not valid' } })
+            })
+        })
+        context('given valid inputs', () => {
+            it('responds with 200 and new scene', () => {
+                return supertest(app)
+                    .post('/api/scenes/1')
+                    .send(insertScene)
+                    .expect(201)
+                    .then(res => {
+                        expect(res.body.location).to.eql(insertScene.location)
+                        expect(res.body.setting).to.eql(insertScene.setting)
+                        expect(res.body.short_summary).to.eql(insertScene.short_summary)
+                        expect(res.body.time_of_day).to.eql(insertScene.time_of_day)
+                    })
+            })
+        })
+        context('given XSS attack', () => {
+            it('removes xss attack', () => {
+                return supertest(app)
+                    .post('/api/scenes/1')
+                    .send(insertMaliciousScene)
+                    .expect(201)
+                    .then(res => {
+                        expect(res.body.setting).to.eql(sanitizedInsertedScene.setting)
+                        expect(res.body.location).to.eql(sanitizedInsertedScene.location)
+                        expect(res.body.time_of_day).to.eql(sanitizedInsertedScene.time_of_day)
+                        expect(res.body.short_summary).to.eql(sanitizedInsertedScene.short_summary)
                     })
             })
         })

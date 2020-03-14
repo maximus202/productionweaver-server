@@ -8,6 +8,7 @@ const { CLIENT_ORIGIN } = require('./config')
 const usersRouter = require('./users/users-router')
 const productionsRouter = require('./productions/productions-router')
 const scenesRouter = require('./scenes/scenes-router')
+const elementsRouter = require('./elements/elements-router')
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', usersRouter)
 app.use('/api/productions', productionsRouter)
 app.use('/api/scenes', scenesRouter)
+app.use('/api/elements', elementsRouter)
 
 app.use(function errorHandler(error, req, res, next) {
     let response
