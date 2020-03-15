@@ -9,6 +9,14 @@ const ElementsService = {
             .select('*')
             .from('productionweaver_elements')
             .where('id', element_id)
+    },
+    insertElement(knex, newElement) {
+        return knex('productionweaver_elements')
+            .insert(newElement)
+            .returning('*')
+            .then(newRow => {
+                return newRow[0]
+            })
     }
 }
 

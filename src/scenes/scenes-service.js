@@ -11,6 +11,12 @@ const ScenesService = {
             .then(newRow => {
                 return newRow[0]
             })
+    },
+    getById(knex, scene_id) {
+        return knex
+            .select('*')
+            .from('productionweaver_scenes')
+            .where('id', scene_id)
     }
 }
 

@@ -1,6 +1,8 @@
 const express = require('express')
 const xss = require('xss')
 const ElementsService = require('../elements/elements-service')
+const ProductionsService = require('../productions/productions-service')
+const ScenesService = require('../scenes/scenes-service')
 
 const jsonParser = express.json()
 const elementsRouter = express.Router()
@@ -61,6 +63,61 @@ elementsRouter
     })
     .get((req, res, next) => {
         res.json(res.element.map(serializeElements))
+    })
+
+elementsRouter
+    .route('/:production_id/:scene_id')
+    .post(jsonParser, (req, res, next) => {
+        const { category, description } = req.body
+        const newElement = { category, description }
+        const production_id = req.params.production_id
+        const scene_id = req.params.scene_id
+        const knexInstance = req.app.get('db')
+
+        //check all inputs are in request body
+        for (const [key, value] of Object.entries(newElement)) {
+            if (value == null) {
+                return res
+                    .status(400)
+                    .json({
+                        error: {
+                            message: 'missing input in the request body'
+                        }
+
+                    })
+                    .catch(next)
+            }
+        }
+
+        //check production_id is valid
+        ProductionsService.getById(knexInstance, production_id)
+            .then(row => {
+                if (row == null) {
+                    return res
+                        .status(400)
+                        .json({ error: { message: 'production_id is not valid' } })
+                }
+            })
+            .catch(next)
+
+        //check scene_id is valid
+        ScenesService.getById(knexInstance, scene_id)
+            .then(row => {
+                if (row == null) {
+                    return res
+                        .status(400)
+                        .json({ error: { message: 'service_id is not valid' } })
+                }
+            })
+            .catch(next)
+
+        ElementsService.insertElement(knexInstance, newElement)
+            .then(newElement => {
+                res
+                    .status(201)
+                    .json(serializeElements(newElement))
+            })
+            .catch(next)
     })
 
 module.exports = elementsRouter

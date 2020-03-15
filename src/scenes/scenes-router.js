@@ -62,7 +62,6 @@ scenesRouter
                         .status(400)
                         .json({ error: { message: 'production_id is not valid' } })
                 }
-
             })
             .catch(next)
 
