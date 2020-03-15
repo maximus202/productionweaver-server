@@ -17,6 +17,15 @@ const ElementsService = {
             .then(newRow => {
                 return newRow[0]
             })
+    },
+    updateElement(knex, updateElement, element_id) {
+        return knex('productionweaver_elements')
+            .where('id', element_id)
+            .update(updateElement)
+            .returning('*')
+            .then(newRow => {
+                return newRow[0]
+            })
     }
 }
 

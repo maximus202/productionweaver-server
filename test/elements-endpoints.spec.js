@@ -129,6 +129,29 @@ describe('Elements endpoints', () => {
         scene_id: 1
     }
 
+    requestWithMissingCategory = {
+        description: 'Here is a description',
+    }
+
+    requestWithMissingDescription = {
+        category: 'Wardrobe',
+    }
+
+    validRequest = {
+        category: 'Cast',
+        description: 'New element'
+    }
+
+    maliciousRequest = {
+        category: 'Cast',
+        description: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
+    }
+
+    sanitizedRequest = {
+        category: 'Cast',
+        description: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.'
+    }
+
     before('make knex instance', () => {
         db = knex({
             client: 'pg',
@@ -268,6 +291,76 @@ describe('Elements endpoints', () => {
                         expect(res.body.date_created).to.eql(testElements.date_created)
                         expect(res.body.production_id).to.eql(testElements.production_id)
                         expect(res.body.scene_id).to.eql(testElements.scene_id)
+                    })
+            })
+        })
+    })
+
+    describe('PATCH /api/elements', () => {
+        beforeEach('insert users', () => {
+            return db
+                .insert(testUsers)
+                .into('productionweaver_users')
+        })
+        beforeEach('insert productions', () => {
+            return db
+                .insert(testProductions)
+                .into('productionweaver_productions')
+        })
+        beforeEach('insert scenes', () => {
+            return db
+                .insert(testScenes)
+                .into('productionweaver_scenes')
+        })
+        beforeEach('insert elements', () => {
+            return db
+                .insert(testElements)
+                .into('productionweaver_elements')
+        })
+
+        context('given missing inputs in the request body', () => {
+            it('responds with 400 and a message when Category is missing', () => {
+                return supertest(app)
+                    .patch('/api/elements/1')
+                    .send(requestWithMissingCategory)
+                    .expect(400, { error: { message: 'missing input in the request body' } })
+            })
+            it('responds with 400 and a message when Description is missing', () => {
+                return supertest(app)
+                    .patch('/api/elements/1')
+                    .send(requestWithMissingDescription)
+                    .expect(400, { error: { message: 'missing input in the request body' } })
+            })
+        })
+        context('given element_id is invalid', () => {
+            it('responds with 400 and a message', () => {
+                return supertest(app)
+                    .patch('/api/elements/9999')
+                    .send(validRequest)
+                    .expect(404, { error: { message: 'element not found' } })
+            })
+        })
+        context('given valid request', () => {
+            it('responds with 201 with updated element', () => {
+                return supertest(app)
+                    .patch('/api/elements/1')
+                    .send(validRequest)
+                    .expect(201)
+                    .then(res => {
+                        expect(res.body.category).to.eql(validRequest.category)
+                        expect(res.body.description).to.eql(validRequest.description)
+                    })
+            })
+        })
+        context('given XSS attack', () => {
+            it('removes XSS attack', () => {
+                return supertest(app)
+                    .patch('/api/elements/1')
+                    .send(maliciousRequest)
+                    .expect(201)
+                    .then(res => {
+                        expect(res.body.category).to.eql(sanitizedRequest.category)
+                        expect(res.body.description).to.eql(sanitizedRequest.description)
                     })
             })
         })

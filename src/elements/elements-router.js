@@ -46,7 +46,6 @@ elementsRouter
         const element_id = req.params.element_id
         ElementsService.getById(knexInstance, element_id)
             .then(element => {
-                console.log(element)
                 if (element.length == 0) {
                     return res
                         .status(404)
@@ -63,6 +62,35 @@ elementsRouter
     })
     .get((req, res, next) => {
         res.json(res.element.map(serializeElements))
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { category, description } = req.body
+        const element_id = req.params.element_id
+        const updateElement = { category, description }
+        const knexInstance = req.app.get('db')
+
+        //check all inputs are in request body
+        for (const [key, value] of Object.entries(updateElement)) {
+            if (value == null) {
+                return res
+                    .status(400)
+                    .json({
+                        error: {
+                            message: 'missing input in the request body'
+                        }
+
+                    })
+                    .catch(next)
+            }
+        }
+
+        ElementsService.updateElement(knexInstance, updateElement, element_id)
+            .then(updateElement => {
+                return res
+                    .status(201)
+                    .json(serializeElements(updateElement))
+            })
+            .catch(next)
     })
 
 elementsRouter
