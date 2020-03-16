@@ -9,6 +9,7 @@ const usersRouter = require('./users/users-router')
 const productionsRouter = require('./productions/productions-router')
 const scenesRouter = require('./scenes/scenes-router')
 const elementsRouter = require('./elements/elements-router')
+const authRouter = require('./auth/auth-router')
 
 const app = express()
 
@@ -27,6 +28,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/productions', productionsRouter)
 app.use('/api/scenes', scenesRouter)
 app.use('/api/elements', elementsRouter)
+app.use('/api/auth', authRouter)
 
 app.use(function errorHandler(error, req, res, next) {
     let response
