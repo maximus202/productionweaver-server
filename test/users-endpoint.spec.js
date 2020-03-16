@@ -124,6 +124,8 @@ describe('Users endpoint', function () {
     //Remove data from users table after each test in this block
     afterEach('clean the tables', () => helpers.cleanTables(db))
 
+
+
     describe('GET /api/users', () => {
         //Tests for when there aren't users in the db
         context('given there are no users in the database', () => {

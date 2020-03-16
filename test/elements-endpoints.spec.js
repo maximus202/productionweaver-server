@@ -152,6 +152,12 @@ describe('Elements endpoints', () => {
         description: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.'
     }
 
+    //create and return basic token
+    function makeAuthHeader(user) {
+        const token = Buffer.from(`${user.email}:${user.password}`).toString('base64')
+        return `Basic ${token}`
+    }
+
     before('make knex instance', () => {
         db = knex({
             client: 'pg',
@@ -169,10 +175,19 @@ describe('Elements endpoints', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/elements', () => {
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .get('/api/elements/')
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         context('given elements do not exist', () => {
             it('responds with 404 error and message', () => {
                 return supertest(app)
                     .get('/api/elements')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {
                         error: {
                             message: 'no elements found'
@@ -204,6 +219,7 @@ describe('Elements endpoints', () => {
             it('responds with 200 and elements', () => {
                 return supertest(app)
                     .get('/api/elements')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .then(res => {
                         expect(res.body.id).to.eql(testElements.id)
@@ -239,6 +255,7 @@ describe('Elements endpoints', () => {
             it('removes xss attack', () => {
                 return supertest(app)
                     .get('/api/elements')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .then(res => {
                         expect(res.body[0].description).to.eql(maliciousElementSanitized.description)
@@ -249,6 +266,14 @@ describe('Elements endpoints', () => {
     })
 
     describe('GET /api/elements/:element_id', () => {
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .get('/api/elements/1')
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         beforeEach('insert users', () => {
             return db
                 .insert(testUsers)
@@ -275,6 +300,7 @@ describe('Elements endpoints', () => {
                 const element_id = 99;
                 return supertest(app)
                     .get(`/api/elements/${element_id}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404)
             })
         })
@@ -283,6 +309,7 @@ describe('Elements endpoints', () => {
                 const element_id = 1
                 return supertest(app)
                     .get(`/api/elements/${element_id}`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .then(res => {
                         expect(res.body.id).to.eql(testElements.id)
@@ -318,16 +345,27 @@ describe('Elements endpoints', () => {
                 .into('productionweaver_elements')
         })
 
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .patch('/api/elements/')
+                    .send(validRequest)
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         context('given missing inputs in the request body', () => {
             it('responds with 400 and a message when Category is missing', () => {
                 return supertest(app)
                     .patch('/api/elements/1')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(requestWithMissingCategory)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
             it('responds with 400 and a message when Description is missing', () => {
                 return supertest(app)
                     .patch('/api/elements/1')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(requestWithMissingDescription)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
@@ -336,6 +374,7 @@ describe('Elements endpoints', () => {
             it('responds with 400 and a message', () => {
                 return supertest(app)
                     .patch('/api/elements/9999')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(validRequest)
                     .expect(404, { error: { message: 'element not found' } })
             })
@@ -344,6 +383,7 @@ describe('Elements endpoints', () => {
             it('responds with 201 with updated element', () => {
                 return supertest(app)
                     .patch('/api/elements/1')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(validRequest)
                     .expect(201)
                     .then(res => {
@@ -356,6 +396,7 @@ describe('Elements endpoints', () => {
             it('removes XSS attack', () => {
                 return supertest(app)
                     .patch('/api/elements/1')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(maliciousRequest)
                     .expect(201)
                     .then(res => {

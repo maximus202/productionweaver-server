@@ -3,6 +3,7 @@ const xss = require('xss')
 const ElementsService = require('../elements/elements-service')
 const ProductionsService = require('../productions/productions-service')
 const ScenesService = require('../scenes/scenes-service')
+const { requireAuth } = require('../middleware/basic-auth')
 
 const jsonParser = express.json()
 const elementsRouter = express.Router()
@@ -18,6 +19,7 @@ const serializeElements = element => ({
 
 elementsRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         ElementsService.getAllElements(knexInstance)
@@ -40,6 +42,7 @@ elementsRouter
 
 elementsRouter
     .route('/:element_id')
+    .all(requireAuth)
     .all((req, res, next) => {
         const knexInstance = req.app.get('db')
         const element_id = req.params.element_id
@@ -94,6 +97,7 @@ elementsRouter
 
 elementsRouter
     .route('/:production_id/:scene_id')
+    .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
         const { category, description } = req.body
         const newElement = { category, description }

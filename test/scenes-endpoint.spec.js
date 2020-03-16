@@ -149,6 +149,12 @@ describe('scenes endpoint', () => {
         short_summary: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
     }
 
+    //create and return basic token
+    function makeAuthHeader(user) {
+        const token = Buffer.from(`${user.email}:${user.password}`).toString('base64')
+        return `Basic ${token}`
+    }
+
     before('make knex instance', () => {
         db = knex({
             client: 'pg',
@@ -166,13 +172,23 @@ describe('scenes endpoint', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/scenes', () => {
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .get('/api/scenes/')
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         context('given scenes do not exist', () => {
             it('responds with 400 and message', () => {
                 return supertest(app)
                     .get('/api/scenes')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(400, { error: { message: 'No scenes found.' } })
             })
         })
+
         context('given scenes exist', () => {
             beforeEach('insert users', () => {
                 return db
@@ -192,9 +208,11 @@ describe('scenes endpoint', () => {
             it('responds with 200 and list of scenes', () => {
                 return supertest(app)
                     .get('/api/scenes')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, testScenes)
             })
         })
+
         context('given an XSS attack', () => {
             beforeEach('insert users', () => {
                 return db
@@ -214,6 +232,7 @@ describe('scenes endpoint', () => {
             it('removes XSS attack', () => {
                 return supertest(app)
                     .get('/api/scenes')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .expect(res => {
                         expect(res.body[0].short_summary).to.eql(sanitizedScene.short_summary)
@@ -223,6 +242,14 @@ describe('scenes endpoint', () => {
     })
 
     describe('POST /api/scenes/:production_id', () => {
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .get('/api/scenes/1')
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         beforeEach('insert testUsers', () => {
             return db
                 .insert(testUsers)
@@ -237,24 +264,28 @@ describe('scenes endpoint', () => {
             it('responds with 400 error and message when setting is missing', () => {
                 return supertest(app)
                     .post(`/api/scenes/1`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(sceneWithoutSetting)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
             it('responds with 400 error and message when location is missing', () => {
                 return supertest(app)
                     .post(`/api/scenes/1`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(sceneWithoutLocation)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
             it('responds with 400 error and message when time of day is missing', () => {
                 return supertest(app)
                     .post(`/api/scenes/1`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(sceneWithoutTimeOfDay)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
             it('responds with 400 error and message when short summary is missing', () => {
                 return supertest(app)
                     .post(`/api/scenes/1`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(sceneWithoutSummary)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
@@ -263,6 +294,7 @@ describe('scenes endpoint', () => {
             it('responds with 400 error and message when production_id is missing', () => {
                 return supertest(app)
                     .post(`/api/scenes/9999`)
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(insertScene)
                     .expect(400, { error: { message: 'production_id is not valid' } })
             })
@@ -271,6 +303,7 @@ describe('scenes endpoint', () => {
             it('responds with 200 and new scene', () => {
                 return supertest(app)
                     .post('/api/scenes/1')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(insertScene)
                     .expect(201)
                     .then(res => {
@@ -285,6 +318,7 @@ describe('scenes endpoint', () => {
             it('removes xss attack', () => {
                 return supertest(app)
                     .post('/api/scenes/1')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(insertMaliciousScene)
                     .expect(201)
                     .then(res => {

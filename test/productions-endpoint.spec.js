@@ -84,6 +84,12 @@ describe('Productions endpoint', () => {
         owner: 1
     }
 
+    //create and return basic token
+    function makeAuthHeader(user) {
+        const token = Buffer.from(`${user.email}:${user.password}`).toString('base64')
+        return `Basic ${token}`
+    }
+
     //make knex instance
     before('make knex instance', () => {
         db = knex({
@@ -103,10 +109,19 @@ describe('Productions endpoint', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/productions', () => {
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .get('/api/productions/')
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         context('given productions do not exist', () => {
             it('responds with 404 and error message', () => {
                 return supertest(app)
                     .get('/api/productions/')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, { error: { message: 'No productions found.' } })
             })
         })
@@ -124,6 +139,7 @@ describe('Productions endpoint', () => {
             it('responds with 200 and all productions', () => {
                 return supertest(app)
                     .get('/api/productions/')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200, testProductions)
             })
 
@@ -142,6 +158,7 @@ describe('Productions endpoint', () => {
             it('removes XSS attack', () => {
                 return supertest(app)
                     .get('/api/productions')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .expect(res => {
                         expect(res.body[0].id).to.eql(sanitizedMaliciousProduction.id)
@@ -154,6 +171,14 @@ describe('Productions endpoint', () => {
     })
 
     describe('POST /api/productions', () => {
+        context('given basic token is missing', () => {
+            it('responds with 401 and error message', () => {
+                return supertest(app)
+                    .post('/api/productions/')
+                    .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
         context('given fields are missing', () => {
             beforeEach('insert users', () => {
                 return db
@@ -164,12 +189,14 @@ describe('Productions endpoint', () => {
             it('responds with 400 and an error message when production_title is missing', () => {
                 return supertest(app)
                     .post('/api/productions/')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(newProductionWithNoTitle)
                     .expect(400, { error: { message: 'production_title missing in request body' } })
             })
             it('responds with 400 and an error message when owner is missing', () => {
                 return supertest(app)
                     .post('/api/productions/')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(newProductionWithNoOwner)
                     .expect(400, { error: { message: 'owner missing in request body' } })
             })
@@ -183,6 +210,7 @@ describe('Productions endpoint', () => {
             it('responds with 201 and the new production', () => {
                 return supertest(app)
                     .post('/api/productions')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(validNewProduction)
                     .expect(201)
                     .expect(res => {
@@ -200,6 +228,7 @@ describe('Productions endpoint', () => {
             it('removes XSS attack', () => {
                 return supertest(app)
                     .post('/api/productions')
+                    .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(maliciousProduction)
                     .expect(201)
                     .expect(res => {

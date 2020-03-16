@@ -15,7 +15,9 @@ authRouter
         for (const [key, value] of Object.entries(loginUser))
             if (value == null)
                 return res.status(400).json({
-                    error: 'missing username or password in request body'
+                    error: {
+                        message: 'missing username or password in request body'
+                    }
                 })
 
         //Gets user with username
@@ -23,18 +25,18 @@ authRouter
             .then(dbUser => {
                 if (!dbUser)
                     return res.status(400).json({
-                        error: 'Incorrect email or password',
+                        error: {
+                            message: 'Incorrect email or password'
+                        },
                     })
                 //Validate password provded matches password stored in db
                 return AuthService.comparePasswords(loginUser.password, dbUser.password)
                     .then(compareMatch => {
-
-                        console.log(loginUser.password)
-                        console.log(dbUser.password)
-                        console.log(compareMatch)
                         if (!compareMatch)
                             return res.status(400).json({
-                                error: 'Incorrect email or password',
+                                error: {
+                                    message: 'Incorrect email or password'
+                                },
                             })
                         //Send the JWT in the response to the user
                         const sub = dbUser.email

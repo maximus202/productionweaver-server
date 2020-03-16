@@ -3,6 +3,7 @@ const express = require('express')
 const xss = require('xss')
 const ScenesService = require('../scenes/scenes-service')
 const ProductionsService = require('../productions/productions-service')
+const { requireAuth } = require('../middleware/basic-auth')
 
 const scenesRouter = express.Router()
 const jsonParser = express.json()
@@ -19,6 +20,7 @@ serializeScene = scene => ({
 
 scenesRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         ScenesService.getAllScenes(knexInstance)
@@ -33,6 +35,7 @@ scenesRouter
 
 scenesRouter
     .route('/:production_id')
+    .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
         const { setting, location, time_of_day, short_summary } = req.body
         const production_id = req.params.production_id
