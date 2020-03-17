@@ -17,7 +17,16 @@ function requireAuth(req, res, next) {
         return res.status(401).json({ error: { message: 'unauthorized request' } })
     }
 
-    next()
+    req.app.get('db')('productionweaver_users')
+        .where({ email: tokenEmail })
+        .first()
+        .then(user => {
+            if (!user || user.password !== tokenPassword) {
+                res.status(401).json({ error: { message: 'unauthorized request' } })
+            }
+            next()
+        })
+        .catch(next)
 }
 
 module.exports = {

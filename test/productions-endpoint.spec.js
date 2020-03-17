@@ -127,7 +127,32 @@ describe('Productions endpoint', () => {
             })
         })
 
+        context('given basic token has credentials for a user that does not exist', () => {
+            it('responds with 401 and error message', () => {
+                const nonExistantUser = { email: 'invalid', password: 'existy' }
+                return supertest(app)
+                    .get('/api/productions/')
+                    .set('Authorization', makeAuthHeader(nonExistantUser))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
+        context('given basic token has credentials for an existing user with the wrong password', () => {
+            it('responds with 401 and error message', () => {
+                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
+                return supertest(app)
+                    .get('/api/productions/')
+                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
         context('given productions do not exist', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .into('productionweaver_users')
+                    .insert(testUsers)
+            })
             it('responds with 404 and error message', () => {
                 return supertest(app)
                     .get('/api/productions/')
@@ -195,6 +220,26 @@ describe('Productions endpoint', () => {
                 return supertest(app)
                     .post('/api/productions/')
                     .set('Authorization', makeAuthHeader(userNoCreds))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
+        context('given basic token has credentials for a user that does not exist', () => {
+            it('responds with 401 and error message', () => {
+                const nonExistantUser = { email: 'invalid', password: 'existy' }
+                return supertest(app)
+                    .post('/api/productions/')
+                    .set('Authorization', makeAuthHeader(nonExistantUser))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
+        context('given basic token has credentials for an existing user with the wrong password', () => {
+            it('responds with 401 and error message', () => {
+                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
+                return supertest(app)
+                    .post('/api/productions/')
+                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
                     .expect(401, { error: { message: 'unauthorized request' } })
             })
         })

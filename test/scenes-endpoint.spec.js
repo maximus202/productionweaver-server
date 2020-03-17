@@ -190,10 +190,35 @@ describe('scenes endpoint', () => {
             })
         })
 
+        context('given basic token has credentials for a user that does not exist', () => {
+            it('responds with 401 and error message', () => {
+                const nonExistantUser = { email: 'invalid', password: 'existy' }
+                return supertest(app)
+                    .get('/api/scenes/')
+                    .set('Authorization', makeAuthHeader(nonExistantUser))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
+        context('given basic token has credentials for an existing user with the wrong password', () => {
+            it('responds with 401 and error message', () => {
+                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
+                return supertest(app)
+                    .get('/api/scenes/')
+                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
         context('given scenes do not exist', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .into('productionweaver_users')
+                    .insert(testUsers)
+            })
             it('responds with 400 and message', () => {
                 return supertest(app)
-                    .get('/api/scenes')
+                    .get('/api/scenes/')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(400, { error: { message: 'No scenes found.' } })
             })
@@ -255,7 +280,7 @@ describe('scenes endpoint', () => {
         context('given basic token is missing', () => {
             it('responds with 401 and error message', () => {
                 return supertest(app)
-                    .get('/api/scenes/1')
+                    .post('/api/scenes/1')
                     .expect(401, { error: { message: 'missing basic token' } })
             })
         })
@@ -264,8 +289,28 @@ describe('scenes endpoint', () => {
             it('responds with 401 and error message', () => {
                 const userNoCreds = { email: '', password: '' }
                 return supertest(app)
-                    .get('/api/scenes/1')
+                    .post('/api/scenes/1')
                     .set('Authorization', makeAuthHeader(userNoCreds))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
+        context('given basic token has credentials for a user that does not exist', () => {
+            it('responds with 401 and error message', () => {
+                const nonExistantUser = { email: 'invalid', password: 'existy' }
+                return supertest(app)
+                    .post('/api/scenes/1')
+                    .set('Authorization', makeAuthHeader(nonExistantUser))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
+        context('given basic token has credentials for an existing user with the wrong password', () => {
+            it('responds with 401 and error message', () => {
+                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
+                return supertest(app)
+                    .post('/api/scenes/1')
+                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
                     .expect(401, { error: { message: 'unauthorized request' } })
             })
         })
