@@ -24,6 +24,7 @@ function requireAuth(req, res, next) {
             if (!user || user.password !== tokenPassword) {
                 res.status(401).json({ error: { message: 'unauthorized request' } })
             }
+            req.user = user
             next()
         })
         .catch(next)
