@@ -3,7 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe('Elements endpoints', () => {
+describe.only('Elements endpoints', () => {
     let db
 
     const testUsers = [
@@ -183,6 +183,16 @@ describe('Elements endpoints', () => {
             })
         })
 
+        context(`given basic token does not have credentials`, () => {
+            it('responds with 401 and error message', () => {
+                const userNoCreds = { email: '', password: '' }
+                return supertest(app)
+                    .get('/api/elements/')
+                    .set('Authorization', makeAuthHeader(userNoCreds))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
         context('given elements do not exist', () => {
             it('responds with 404 error and message', () => {
                 return supertest(app)
@@ -271,6 +281,16 @@ describe('Elements endpoints', () => {
                 return supertest(app)
                     .get('/api/elements/1')
                     .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
+        context(`given basic token does not have credentials`, () => {
+            it('responds with 401 and error message', () => {
+                const userNoCreds = { email: '', password: '' }
+                return supertest(app)
+                    .get('/api/elements/1')
+                    .set('Authorization', makeAuthHeader(userNoCreds))
+                    .expect(401, { error: { message: 'unauthorized request' } })
             })
         })
 

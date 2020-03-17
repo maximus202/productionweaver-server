@@ -117,6 +117,16 @@ describe('Productions endpoint', () => {
             })
         })
 
+        context(`given basic token does not have credentials`, () => {
+            it('responds with 401 and error message', () => {
+                const userNoCreds = { email: '', password: '' }
+                return supertest(app)
+                    .get('/api/productions/')
+                    .set('Authorization', makeAuthHeader(userNoCreds))
+                    .expect(401, { error: { message: 'unauthorized request' } })
+            })
+        })
+
         context('given productions do not exist', () => {
             it('responds with 404 and error message', () => {
                 return supertest(app)
@@ -176,6 +186,16 @@ describe('Productions endpoint', () => {
                 return supertest(app)
                     .post('/api/productions/')
                     .expect(401, { error: { message: 'missing basic token' } })
+            })
+        })
+
+        context(`given basic token does not have credentials`, () => {
+            it('responds with 401 and error message', () => {
+                const userNoCreds = { email: '', password: '' }
+                return supertest(app)
+                    .post('/api/productions/')
+                    .set('Authorization', makeAuthHeader(userNoCreds))
+                    .expect(401, { error: { message: 'unauthorized request' } })
             })
         })
 
