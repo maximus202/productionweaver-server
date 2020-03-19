@@ -1,5 +1,34 @@
+const AuthService = require('../auth/auth-service')
+
 function requireAuth(req, res, next) {
-    next()
+    const authToken = req.get('Authorization') || ''
+
+    let bearerToken
+    if (!authToken.toLowerCase().startsWith('bearer ')) {
+        return res.status(401).json({ error: { message: 'missing bearer token' } })
+    } else {
+        bearerToken = authToken.slice(7, authToken.length)
+    }
+
+    try {
+        const payload = AuthService.verifyJwt(bearerToken)
+
+        AuthService.getUserWithUserName(
+            req.get.app('db'),
+            payload.sub,
+        )
+            .then(user => {
+                if (!user)
+                    return res.status(401).json({ error: { message: 'unauthorized request' } })
+                next()
+            })
+            .catch(err => {
+                console.log(err)
+                next(err)
+            })
+    } catch (error) {
+        res.status(401).json({ error: 'Unauthorized request' })
+    }
 }
 
 module.exports = {

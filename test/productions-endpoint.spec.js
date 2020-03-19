@@ -3,7 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe('Productions endpoint', () => {
+describe.only('Productions endpoint', () => {
     let db
 
     //test users
@@ -109,22 +109,11 @@ describe('Productions endpoint', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/productions', () => {
-        /*context('login', () => {
-            it('responds with basic token', () => {
-                return supertest(app)
-                    .post('/api/auth/login')
-                    .send({email: ''})
-                    .then(res => {
-                        console.log(res)
-                    })
-            })
-        })*/
-
-        context('given basic token is missing', () => {
+        context('given bearer token is missing', () => {
             it('responds with 401 and error message', () => {
                 return supertest(app)
                     .get('/api/productions/')
-                    .expect(401, { error: { message: 'missing basic token' } })
+                    .expect(401, { error: { message: 'missing bearer token' } })
             })
         })
 
