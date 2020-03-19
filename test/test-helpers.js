@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs')
+
 function cleanTables(db) {
     return db.raw(
         `TRUNCATE

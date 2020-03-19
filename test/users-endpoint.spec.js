@@ -13,7 +13,7 @@ describe('Users endpoint', function () {
             first_name: 'Martin',
             last_name: 'Scorsese',
             email: 'mscorsese@studio.com',
-            password: 'taxidriver',
+            password: '$2y$10$/tEjnUkJE3WP.eOIWzj9.usxxas8rJnaW4DWOmdM58jhm.waQzuTa',
             date_created: '2029-01-22T16:28:32.615Z'
         },
         {
@@ -21,7 +21,7 @@ describe('Users endpoint', function () {
             first_name: 'Alfred',
             last_name: 'Hitchcock',
             email: 'ahitchcock@studio.com',
-            password: 'psycho',
+            password: '$2y$12$jaAyDNT.oD1UXcyckL2Zsumq6VEdP5.3lMgKyVnJjKmtNTBlxFKqO',
             date_created: '2001-01-22T16:28:32.615Z'
         },
         {
@@ -29,7 +29,7 @@ describe('Users endpoint', function () {
             first_name: 'Ridley',
             last_name: 'Scott',
             email: 'rscott@studio.com',
-            password: 'themartian',
+            password: '$2y$12$gRoOtIsv0fwtqsIKsfmcD.jnF9jcctpN2IyLezyiPsPl2pDNdEO9W',
             date_created: '2001-01-28T16:28:32.615Z'
         },
         {
@@ -37,7 +37,7 @@ describe('Users endpoint', function () {
             first_name: 'James',
             last_name: 'Cameron',
             email: 'jcameron@studio.com',
-            password: 'avatar',
+            password: '$2y$12$dHbJD2eo2c3cc7KpAZTaKOvzvwxLMzaLNkRUeLB/pJKmL2hgRNd46',
             date_created: '1992-07-22T16:28:32.615Z'
         },
         {
@@ -45,7 +45,7 @@ describe('Users endpoint', function () {
             first_name: 'Quentin',
             last_name: 'Tarantino',
             email: 'qtarantino@studio.com',
-            password: 'reservoirdogs',
+            password: '$2y$12$OcNLOPO3gLYUQbKVfbV3xe7QIaQb9j/tDceCwPNHrw0OYdukfLJJS',
             date_created: '1999-07-02T16:28:32.615Z'
         },
     ];
@@ -55,7 +55,7 @@ describe('Users endpoint', function () {
         first_name: 'Malicious first name <script>alert("xss");</script>',
         last_name: 'Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
         email: 'email@kasdfoandf.com',
-        password: 'helloimfriendly',
+        password: '$2y$12$6y21lLlF2hX90e2Hf1bS/OY8XX4HpGYIibLZf4Ueinhe4DWmzTC3m',
         date_created: '1999-07-02T16:28:32.615Z'
     }
 
@@ -64,26 +64,26 @@ describe('Users endpoint', function () {
         first_name: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt;',
         last_name: 'Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
         email: 'email@kasdfoandf.com',
-        password: 'helloimfriendly',
+        password: '$2y$12$bxTrUFKuYIxzotChGwlxGu952H4Fzgda8iZMWwKpUtuLQPY3ogPum',
         date_created: '1999-07-02T16:28:32.615Z'
     }
 
     const userWithMissingFirstName = {
         last_name: 'Howard',
         email: 'rhoward@studio.com',
-        password: 'ladyinthewater'
+        password: '$2y$12$U6h80rc7t5qOKlWdYyVmY.c0SImACqflD/6oX/0Tg6jiJ09KHkw2S'
     }
 
     const userwithMissingLastName = {
         first_name: 'Frank',
         email: 'fmiller@studio.com',
-        password: 'madmax'
+        password: '$2y$12$VyxfH3DsRUsS5kzdhc9R.u/WPK0vEXwQvbFvzCBC.eYF/Yp9mMTLO'
     }
 
     const userwithMissingEmail = {
         first_name: 'Todd',
         last_name: 'Phillips',
-        password: 'joker'
+        password: '$2y$12$rbwdT.PfU7VgdjYBAVWgeOPJOuRkuh2c1IyNleVuUtmF6clKItM6S'
     }
 
     const userWithMissingPassword = {
@@ -96,7 +96,7 @@ describe('Users endpoint', function () {
         first_name: 'Leigh',
         last_name: 'Wannell',
         email: 'lwannell@studio.com',
-        password: 'upgrade'
+        password: '$2y$12$FFsEzEMGRuNK8tgh9hzgr.aipjznKJApyzh.ANXnwSzc00B3soAUm'
     }
 
     const updateUserWithMissingFields = {}
@@ -148,7 +148,13 @@ describe('Users endpoint', function () {
             it('responds with 200 and all users', () => {
                 return supertest(app)
                     .get('/api/users')
-                    .expect(200, testUsers)
+                    .expect(200)
+                    .then(res => {
+                        expect(res.body.id).to.eql(testUsers.id)
+                        expect(res.body.first_name).to.eql(testUsers.first_name)
+                        expect(res.body.last_name).to.eql(testUsers.last_name)
+                        expect(res.body.email).to.eql(testUsers.email)
+                    })
             })
         })
 
@@ -167,8 +173,6 @@ describe('Users endpoint', function () {
                         expect(res.body[0].first_name).to.eql(sanitizedMaliciousUser.first_name)
                         expect(res.body[0].last_name).to.eql(sanitizedMaliciousUser.last_name)
                         expect(res.body[0].email).to.eql(sanitizedMaliciousUser.email)
-                        expect(res.body[0].password).to.eql(sanitizedMaliciousUser.password)
-                        expect(res.body[0].date_created).to.eql(sanitizedMaliciousUser.date_created)
                     })
             })
         })
@@ -203,7 +207,13 @@ describe('Users endpoint', function () {
                 const user_id = 1
                 return supertest(app)
                     .get(`/api/users/${user_id}`)
-                    .expect(200, testUsers[0])
+                    .expect(200)
+                    .then(res => {
+                        expect(res.body.id).to.eql(testUsers[0].id)
+                        expect(res.body.first_name).to.eql(testUsers[0].first_name)
+                        expect(res.body.last_name).to.eql(testUsers[0].last_name)
+                        expect(res.body.email).to.eql(testUsers[0].email)
+                    })
             })
         })
         context('given an XSS attack', () => {
@@ -221,8 +231,6 @@ describe('Users endpoint', function () {
                         expect(res.body.first_name).to.eql(sanitizedMaliciousUser.first_name)
                         expect(res.body.last_name).to.eql(sanitizedMaliciousUser.last_name)
                         expect(res.body.email).to.eql(sanitizedMaliciousUser.email)
-                        expect(res.body.password).to.eql(sanitizedMaliciousUser.password)
-                        expect(res.body.date_created).to.eql(sanitizedMaliciousUser.date_created)
                     })
             })
         })
@@ -271,7 +279,6 @@ describe('Users endpoint', function () {
                         expect(res.body.first_name).to.eql(newUser.first_name)
                         expect(res.body.last_name).to.eql(newUser.last_name)
                         expect(res.body.email).to.eql(newUser.email)
-                        expect(res.body.password).to.eql(newUser.password)
                     })
             })
         })
@@ -287,7 +294,6 @@ describe('Users endpoint', function () {
                         expect(res.body.first_name).to.eql(sanitizedMaliciousUser.first_name)
                         expect(res.body.last_name).to.eql(sanitizedMaliciousUser.last_name)
                         expect(res.body.email).to.eql(sanitizedMaliciousUser.email)
-                        expect(res.body.password).to.eql(sanitizedMaliciousUser.password)
                     })
             })
         })

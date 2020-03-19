@@ -26,7 +26,7 @@ authRouter
                 if (!dbUser)
                     return res.status(400).json({
                         error: {
-                            message: 'Incorrect email or password'
+                            message: 'incorrect username or password'
                         },
                     })
                 //Validate password provded matches password stored in db
@@ -35,7 +35,7 @@ authRouter
                         if (!compareMatch)
                             return res.status(400).json({
                                 error: {
-                                    message: 'Incorrect email or password'
+                                    message: 'incorrect username or password'
                                 },
                             })
                         //Send the JWT in the response to the user

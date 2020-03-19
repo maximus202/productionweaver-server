@@ -3,17 +3,17 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe.only('Productions endpoint', () => {
+describe('Productions endpoint', () => {
     let db
 
     //test users
     const testUsers = [
         {
             id: 1,
-            first_name: 'Martin',
-            last_name: 'Scorsese',
-            email: 'mscorsese@studio.com',
-            password: 'taxidriver',
+            first_name: 'Kevin',
+            last_name: 'Feige',
+            email: 'kfeige@marvel.com',
+            password: 'Kevin',
             date_created: '2029-01-22T16:28:32.615Z'
         },
         {
@@ -21,7 +21,7 @@ describe.only('Productions endpoint', () => {
             first_name: 'Alfred',
             last_name: 'Hitchcock',
             email: 'ahitchcock@studio.com',
-            password: 'psycho',
+            password: 'Alfred',
             date_created: '2001-01-22T16:28:32.615Z'
         },
         {
@@ -29,7 +29,7 @@ describe.only('Productions endpoint', () => {
             first_name: 'Ridley',
             last_name: 'Scott',
             email: 'rscott@studio.com',
-            password: 'themartian',
+            password: 'Ridley',
             date_created: '2001-01-28T16:28:32.615Z'
         },
     ]
@@ -52,7 +52,7 @@ describe.only('Productions endpoint', () => {
             id: 3,
             production_title: 'Avengers: Endgame',
             date_created: '2009-01-22T16:28:32.615Z',
-            owner: 3
+            owner: 2
         },
     ]
 
@@ -109,6 +109,17 @@ describe.only('Productions endpoint', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/productions', () => {
+        /*context('login', () => {
+            it('responds with basic token', () => {
+                return supertest(app)
+                    .post('/api/auth/login')
+                    .send({email: ''})
+                    .then(res => {
+                        console.log(res)
+                    })
+            })
+        })*/
+
         context('given basic token is missing', () => {
             it('responds with 401 and error message', () => {
                 return supertest(app)
@@ -153,10 +164,15 @@ describe.only('Productions endpoint', () => {
                     .into('productionweaver_users')
                     .insert(testUsers)
             })
+            beforeEach('insert productions', () => {
+                return db
+                    .into('productionweaver_productions')
+                    .insert(testProductions)
+            })
             it('responds with 404 and error message', () => {
                 return supertest(app)
                     .get('/api/productions/')
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', makeAuthHeader(testUsers[2]))
                     .expect(404, { error: { message: 'No productions found.' } })
             })
         })

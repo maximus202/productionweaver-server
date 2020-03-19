@@ -12,7 +12,7 @@ describe('Elements endpoints', () => {
             first_name: 'Martin',
             last_name: 'Scorsese',
             email: 'mscorsese@studio.com',
-            password: 'taxidriver',
+            password: '$2y$10$/tEjnUkJE3WP.eOIWzj9.usxxas8rJnaW4DWOmdM58jhm.waQzuTa',
             date_created: '2029-01-22T16:28:32.615Z'
         },
         {
@@ -20,7 +20,7 @@ describe('Elements endpoints', () => {
             first_name: 'Alfred',
             last_name: 'Hitchcock',
             email: 'ahitchcock@studio.com',
-            password: 'psycho',
+            password: '$2y$12$jaAyDNT.oD1UXcyckL2Zsumq6VEdP5.3lMgKyVnJjKmtNTBlxFKqO',
             date_created: '2001-01-22T16:28:32.615Z'
         },
         {
@@ -28,7 +28,7 @@ describe('Elements endpoints', () => {
             first_name: 'Ridley',
             last_name: 'Scott',
             email: 'rscott@studio.com',
-            password: 'themartian',
+            password: '$2y$12$gRoOtIsv0fwtqsIKsfmcD.jnF9jcctpN2IyLezyiPsPl2pDNdEO9W',
             date_created: '2001-01-28T16:28:32.615Z'
         },
     ]
