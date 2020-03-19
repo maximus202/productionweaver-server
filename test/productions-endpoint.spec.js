@@ -3,7 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe.only('Productions endpoint', () => {
+describe('Productions endpoint', () => {
     let db
 
     //test users
@@ -117,17 +117,17 @@ describe.only('Productions endpoint', () => {
             })
         })
 
-        context(`given basic token does not have credentials`, () => {
+        context(`given token does not have credentials`, () => {
             it('responds with 401 and error message', () => {
                 const userNoCreds = { email: '', password: '' }
                 return supertest(app)
                     .get('/api/productions/')
                     .set('Authorization', makeAuthHeader(userNoCreds))
-                    .expect(401, { error: { message: 'unauthorized request' } })
+                    .expect(401, { error: { message: 'missing bearer token' } })
             })
         })
 
-        context('given basic token has credentials for a user that does not exist', () => {
+        context('given token has credentials for a user that does not exist', () => {
             it('responds with 401 and error message', () => {
                 const nonExistantUser = { email: 'invalid', password: 'existy' }
                 return supertest(app)
@@ -137,7 +137,7 @@ describe.only('Productions endpoint', () => {
             })
         })
 
-        context('given basic token has credentials for an existing user with the wrong password', () => {
+        context('given token has credentials for an existing user with the wrong password', () => {
             it('responds with 401 and error message', () => {
                 const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
                 return supertest(app)
