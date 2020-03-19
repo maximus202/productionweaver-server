@@ -3,7 +3,7 @@ const xss = require('xss')
 const ElementsService = require('../elements/elements-service')
 const ProductionsService = require('../productions/productions-service')
 const ScenesService = require('../scenes/scenes-service')
-const { requireAuth } = require('../middleware/basic-auth')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const jsonParser = express.json()
 const elementsRouter = express.Router()
