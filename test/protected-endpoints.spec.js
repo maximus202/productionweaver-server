@@ -1,6 +1,7 @@
 const knex = require('knex')
 const app = require('../src/app')
 const helpers = require('../test/test-helpers')
+const jwt = require('jsonwebtoken')
 
 describe('Protected endpoints', () => {
     let db
@@ -125,10 +126,19 @@ describe('Protected endpoints', () => {
     ]
 
     protectedEndpoints.forEach(endpoint => {
-        describe.only(endpoint.name, () => {
+        describe(endpoint.name, () => {
             it('responds with 401 and "missing bearer token" when no bearer token', () => {
                 return endpoint.method(endpoint.path)
                     .expect(401, { error: { message: 'missing bearer token' } })
+            })
+
+            it.only('responds 401 "unauthorized request" when invalid JWT secret', () => {
+                const validUser = testUsers[0]
+                const invalidSecret = 'bad-secret'
+                const token = jwt.sign({ user_id: validUser.id }, invalidSecret, { subject: validUser.email, algorithm: 'HS256' })
+                return endpoint.method(endpoint.path)
+                    .set('Authorization', `bearer ${token}`)
+                    .expect(401, { error: { message: 'Unauthorized request' } })
             })
         })
     })
