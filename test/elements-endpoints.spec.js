@@ -175,44 +175,6 @@ describe('Elements endpoints', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/elements', () => {
-        context('given basic token is missing', () => {
-            it('responds with 401 and error message', () => {
-                return supertest(app)
-                    .get('/api/elements/')
-                    .expect(401, { error: { message: 'missing basic token' } })
-            })
-        })
-
-        context(`given basic token does not have credentials`, () => {
-            it('responds with 401 and error message', () => {
-                const userNoCreds = { email: '', password: '' }
-                return supertest(app)
-                    .get('/api/elements/')
-                    .set('Authorization', makeAuthHeader(userNoCreds))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for a user that does not exist', () => {
-            it('responds with 401 and error message', () => {
-                const nonExistantUser = { email: 'invalid', password: 'existy' }
-                return supertest(app)
-                    .get('/api/elements')
-                    .set('Authorization', makeAuthHeader(nonExistantUser))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for an existing user with the wrong password', () => {
-            it('responds with 401 and error message', () => {
-                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
-                return supertest(app)
-                    .get('/api/elements/')
-                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
         context('given elements do not exist', () => {
             beforeEach('insert users', () => {
                 return db
@@ -302,44 +264,6 @@ describe('Elements endpoints', () => {
     })
 
     describe('GET /api/elements/:element_id', () => {
-        context('given basic token is missing', () => {
-            it('responds with 401 and error message', () => {
-                return supertest(app)
-                    .get('/api/elements/1')
-                    .expect(401, { error: { message: 'missing basic token' } })
-            })
-        })
-
-        context(`given basic token does not have credentials`, () => {
-            it('responds with 401 and error message', () => {
-                const userNoCreds = { email: '', password: '' }
-                return supertest(app)
-                    .get('/api/elements/1')
-                    .set('Authorization', makeAuthHeader(userNoCreds))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for a user that does not exist', () => {
-            it('responds with 401 and error message', () => {
-                const nonExistantUser = { email: 'invalid', password: 'existy' }
-                return supertest(app)
-                    .get('/api/elements/1')
-                    .set('Authorization', makeAuthHeader(nonExistantUser))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for an existing user with the wrong password', () => {
-            it('responds with 401 and error message', () => {
-                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
-                return supertest(app)
-                    .get('/api/elements/1')
-                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
         beforeEach('insert users', () => {
             return db
                 .insert(testUsers)
@@ -409,45 +333,6 @@ describe('Elements endpoints', () => {
             return db
                 .insert(testElements)
                 .into('productionweaver_elements')
-        })
-
-        context('given basic token is missing', () => {
-            it('responds with 401 and error message', () => {
-                return supertest(app)
-                    .patch('/api/elements/')
-                    .send(validRequest)
-                    .expect(401, { error: { message: 'missing basic token' } })
-            })
-        })
-
-        context(`given basic token does not have credentials`, () => {
-            it('responds with 401 and error message', () => {
-                const userNoCreds = { email: '', password: '' }
-                return supertest(app)
-                    .patch('/api/elements/')
-                    .set('Authorization', makeAuthHeader(userNoCreds))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for a user that does not exist', () => {
-            it('responds with 401 and error message', () => {
-                const nonExistantUser = { email: 'invalid', password: 'existy' }
-                return supertest(app)
-                    .patch('/api/elements/')
-                    .set('Authorization', makeAuthHeader(nonExistantUser))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for an existing user with the wrong password', () => {
-            it('responds with 401 and error message', () => {
-                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
-                return supertest(app)
-                    .patch('/api/elements/')
-                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
         })
 
         context('given missing inputs in the request body', () => {

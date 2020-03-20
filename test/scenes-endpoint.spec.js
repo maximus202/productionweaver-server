@@ -172,44 +172,6 @@ describe('scenes endpoint', () => {
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
 
     describe('GET /api/scenes', () => {
-        context('given basic token is missing', () => {
-            it('responds with 401 and error message', () => {
-                return supertest(app)
-                    .get('/api/scenes/')
-                    .expect(401, { error: { message: 'missing basic token' } })
-            })
-        })
-
-        context(`given basic token does not have credentials`, () => {
-            it('responds with 401 and error message', () => {
-                const userNoCreds = { email: '', password: '' }
-                return supertest(app)
-                    .get('/api/scenes/')
-                    .set('Authorization', makeAuthHeader(userNoCreds))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for a user that does not exist', () => {
-            it('responds with 401 and error message', () => {
-                const nonExistantUser = { email: 'invalid', password: 'existy' }
-                return supertest(app)
-                    .get('/api/scenes/')
-                    .set('Authorization', makeAuthHeader(nonExistantUser))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for an existing user with the wrong password', () => {
-            it('responds with 401 and error message', () => {
-                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
-                return supertest(app)
-                    .get('/api/scenes/')
-                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
         context('given scenes do not exist', () => {
             beforeEach('insert users', () => {
                 return db
@@ -277,44 +239,6 @@ describe('scenes endpoint', () => {
     })
 
     describe('POST /api/scenes/:production_id', () => {
-        context('given basic token is missing', () => {
-            it('responds with 401 and error message', () => {
-                return supertest(app)
-                    .post('/api/scenes/1')
-                    .expect(401, { error: { message: 'missing basic token' } })
-            })
-        })
-
-        context(`given basic token does not have credentials`, () => {
-            it('responds with 401 and error message', () => {
-                const userNoCreds = { email: '', password: '' }
-                return supertest(app)
-                    .post('/api/scenes/1')
-                    .set('Authorization', makeAuthHeader(userNoCreds))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for a user that does not exist', () => {
-            it('responds with 401 and error message', () => {
-                const nonExistantUser = { email: 'invalid', password: 'existy' }
-                return supertest(app)
-                    .post('/api/scenes/1')
-                    .set('Authorization', makeAuthHeader(nonExistantUser))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
-        context('given basic token has credentials for an existing user with the wrong password', () => {
-            it('responds with 401 and error message', () => {
-                const userWithInvalidPassword = { email: testUsers[0].email, password: 'wrong' }
-                return supertest(app)
-                    .post('/api/scenes/1')
-                    .set('Authorization', makeAuthHeader(userWithInvalidPassword))
-                    .expect(401, { error: { message: 'unauthorized request' } })
-            })
-        })
-
         beforeEach('insert testUsers', () => {
             return db
                 .insert(testUsers)
