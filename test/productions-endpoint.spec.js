@@ -115,12 +115,11 @@ describe('Productions endpoint', () => {
                     .into('productionweaver_users')
                     .insert(testUsers)
             })
-            it('responds with 404 and error message', () => {
+            it.only('responds with 404 and error message', () => {
                 return supertest(app)
                     .get('/api/productions/')
                     .set('Authorization', makeAuthHeader(testUsers[2]))
-                    .then(res => { console.log(res.body) })
-                //.expect(404, { error: { message: 'No productions found.' } })
+                    .expect(404, { error: { message: 'No productions found.' } })
             })
         })
         context('given productions exist', () => {
