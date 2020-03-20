@@ -3,7 +3,7 @@ const app = require('../src/app')
 const helpers = require('../test/test-helpers')
 const jwt = require('jsonwebtoken')
 
-describe('Protected endpoints', () => {
+describe.only('Protected endpoints', () => {
     let db
 
     //test users
@@ -132,13 +132,22 @@ describe('Protected endpoints', () => {
                     .expect(401, { error: { message: 'missing bearer token' } })
             })
 
-            it.only('responds 401 "unauthorized request" when invalid JWT secret', () => {
+            it('responds 401 "unauthorized request" when invalid JWT secret', () => {
                 const validUser = testUsers[0]
                 const invalidSecret = 'bad-secret'
                 const token = jwt.sign({ user_id: validUser.id }, invalidSecret, { subject: validUser.email, algorithm: 'HS256' })
                 return endpoint.method(endpoint.path)
                     .set('Authorization', `bearer ${token}`)
                     .expect(401, { error: { message: 'Unauthorized request' } })
+            })
+
+            it('responds 401 "Unauthorized request" when invalid sub in payload', () => {
+                const invalidUser = { email: 'user-not-existy', id: 1 }
+                const secret = process.env.JWT_SECRET
+                const token = jwt.sign({ user_id: invalidUser.id }, secret, { subject: invalidUser.email, algorithm: 'HS256' })
+                return endpoint.method(endpoint.path)
+                    .set('Authorization', `bearer ${token}`)
+                    .expect(401, { error: { message: `unauthorized request` } })
             })
         })
     })
