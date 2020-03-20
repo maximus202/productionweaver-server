@@ -149,12 +149,6 @@ describe('scenes endpoint', () => {
         short_summary: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
     }
 
-    //create and return basic token
-    function makeAuthHeader(user) {
-        const token = Buffer.from(`${user.email}:${user.password}`).toString('base64')
-        return `Basic ${token}`
-    }
-
     before('make knex instance', () => {
         db = knex({
             client: 'pg',
@@ -170,6 +164,11 @@ describe('scenes endpoint', () => {
 
     //Remove data from users table after each test in this block
     afterEach('clean the tables after each test', () => helpers.cleanTables(db))
+
+    function makeAuthHeader(user, secret = process.env.JWT_SECRET) {
+        const token = jwt.sign({ id: user.id }, secret, { subject: user.email, algorithm: 'HS256' })
+        return `bearer ${token}`
+    }
 
     describe('GET /api/scenes', () => {
         context('given scenes do not exist', () => {

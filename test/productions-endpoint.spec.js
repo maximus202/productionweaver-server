@@ -115,7 +115,7 @@ describe('Productions endpoint', () => {
                     .into('productionweaver_users')
                     .insert(testUsers)
             })
-            it.only('responds with 404 and error message', () => {
+            it('responds with 404 and error message', () => {
                 return supertest(app)
                     .get('/api/productions/')
                     .set('Authorization', makeAuthHeader(testUsers[2]))
