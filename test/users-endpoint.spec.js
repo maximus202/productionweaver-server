@@ -247,7 +247,6 @@ describe('Users endpoint', function () {
                             message: `first_name missing in request body`
                         }
                     })
-
             })
             it('responds with 400 if last name is missing', () => {
                 return supertest(app)
