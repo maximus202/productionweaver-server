@@ -12,7 +12,7 @@ describe('Auth endpoints', () => {
             first_name: 'Martin',
             last_name: 'Scorsese',
             email: 'mscorsese@studio.com',
-            password: 'Martin',
+            password: '$2y$10$953JvcEfsgBQ2EfqBeFMtezKWqrzm4GgUh8o6VWxjkZkrgjURSrAu',
             date_created: '2029-01-22T16:28:32.615Z'
         },
         {
@@ -116,29 +116,15 @@ describe('Auth endpoints', () => {
         })
 
         context('given username and password is correct', () => {
-            it.only('responds with 200 and JWT auth token using secret', () => {
+            it('responds with 200 and JWT auth token using secret', () => {
                 const validUsernamePassword = {
                     email: 'mscorsese@studio.com',
                     password: 'Martin'
                 }
-                /*const expectedToken = jwt.sign(
-                    { id: testUsers.id },
-                    process.env.JWT_SECRET,
-                    {
-                        subject: testUsers[0].email,
-                        expiresIn: process.env.JWT_EXPIRY,
-                        algorithm: 'HS256'
-                    }
-                )*/
                 return supertest(app)
                     .post('/api/auth/login')
                     .send(validUsernamePassword)
-                    .then(res => {
-                        console.log(res.body)
-                    })
-                /*.expect(200, {
-                    authToken: expectedToken,
-                })*/
+                    .expect(200)
             })
         })
     })

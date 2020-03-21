@@ -253,7 +253,7 @@ describe('scenes endpoint', () => {
             it('responds with 400 error and message when setting is missing', () => {
                 return supertest(app)
                     .post(`/api/scenes/1`)
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
+                    .set('Authorization', makeAuthHeader(testUsers[1]))
                     .send(sceneWithoutSetting)
                     .expect(400, { error: { message: 'missing input in the request body' } })
             })
