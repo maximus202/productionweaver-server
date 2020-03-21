@@ -20,7 +20,7 @@ describe('Auth endpoints', () => {
             first_name: 'Alfred',
             last_name: 'Hitchcock',
             email: 'ahitchcock@studio.com',
-            password: 'Alfred',
+            password: '$2y$10$LsIWDHVRtj1WwedWHP2EkOrAo/DBE6Q8lUyTdSSmha7a7NwYobO7q',
             date_created: '2001-01-22T16:28:32.615Z'
         },
         {
@@ -28,7 +28,7 @@ describe('Auth endpoints', () => {
             first_name: 'Ridley',
             last_name: 'Scott',
             email: 'rscott@studio.com',
-            password: 'Ridley',
+            password: '$2y$10$nlD4wR/bUqK2/daaXhLqlOcKsXxPns4sju.xmMhocrZjKbWlXJwLm',
             date_created: '2001-01-28T16:28:32.615Z'
         },
     ]
