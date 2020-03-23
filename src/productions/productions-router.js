@@ -19,7 +19,8 @@ productionsRouter
     .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
-        ProductionsService.getAllProductions(knexInstance)
+        const user_id = req.user_id
+        ProductionsService.getAllProductions(knexInstance, user_id)
             .then(productions => {
                 if (productions.length == 0) {
                     res.status(404).json({ error: { message: 'No productions found.' } })

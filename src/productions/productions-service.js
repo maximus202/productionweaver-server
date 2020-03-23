@@ -1,8 +1,9 @@
 const ProductionsService = {
-    getAllProductions(knex) {
+    getAllProductions(knex, user_id) {
         return knex
             .select('*')
             .from('productionweaver_productions')
+            .where('owner', user_id)
     },
     getById(knex, production_id) {
         return knex

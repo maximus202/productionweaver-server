@@ -123,6 +123,12 @@ describe('Productions endpoint', () => {
             })
         })
         context('given productions exist', () => {
+            const expectedProduction = [{
+                id: 1,
+                production_title: 'Parasite',
+                date_created: '2029-01-22T16:28:32.615Z',
+                owner: 1
+            }]
             beforeEach('insert users', () => {
                 return db
                     .into('productionweaver_users')
@@ -137,7 +143,7 @@ describe('Productions endpoint', () => {
                 return supertest(app)
                     .get('/api/productions/')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
-                    .expect(200, testProductions)
+                    .expect(200, expectedProduction)
             })
 
         })
