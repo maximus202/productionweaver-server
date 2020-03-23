@@ -30,9 +30,9 @@ productionsRouter
             .catch(next)
     })
     .post(jsonParser, (req, res, next) => {
-        const { production_title, owner } = req.body
+        const { production_title } = req.body
+        const owner = req.user_id
         const newProduction = { production_title, owner }
-
         for (const [key, value] of Object.entries(newProduction)) {
             if (value == null) {
                 return res.status(400).json({
