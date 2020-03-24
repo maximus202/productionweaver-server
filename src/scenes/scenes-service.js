@@ -1,8 +1,9 @@
 const ScenesService = {
-    getAllScenes(knex) {
+    getAllScenes(knex, user_id) {
         return knex
             .select('*')
             .from('productionweaver_scenes')
+            .where('owner', user_id)
     },
     insertScene(knex, newScene) {
         return knex('productionweaver_scenes')

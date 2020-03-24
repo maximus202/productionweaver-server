@@ -23,7 +23,8 @@ scenesRouter
     .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
-        ScenesService.getAllScenes(knexInstance)
+        const user_id = req.user_id
+        ScenesService.getAllScenes(knexInstance, user_id)
             .then(scenes => {
                 if (scenes.length == 0) {
                     res.status(400).json({ error: { message: 'No scenes found.' } })

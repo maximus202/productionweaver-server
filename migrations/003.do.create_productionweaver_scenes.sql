@@ -17,5 +17,6 @@ CREATE TABLE productionweaver_scenes (
     time_of_day time_of_day NOT NULL,
     short_summary TEXT,
     date_created TIMESTAMP NOT NULL DEFAULT now(),
-    production_id INTEGER NOT NULL REFERENCES productionweaver_productions(id) ON DELETE CASCADE
+    production_id INTEGER NOT NULL REFERENCES productionweaver_productions(id) ON DELETE CASCADE,
+    owner INTEGER NOT NULL REFERENCES productionweaver_users(id) ON DELETE CASCADE
 );
