@@ -54,4 +54,23 @@ productionsRouter
             .catch(next)
     })
 
+productionsRouter
+    .route('/:production_id')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        const user_id = req.user_id
+        const production_id = req.params.production_id
+        ProductionsService.getById(knexInstance, user_id, production_id)
+            .then(row => {
+                if (row == null) {
+                    return res
+                        .status(404)
+                        .json({ error: { message: 'Production not found.' } })
+                }
+                res.json(serializeProduction(row))
+            })
+            .catch(next)
+    })
+
 module.exports = productionsRouter

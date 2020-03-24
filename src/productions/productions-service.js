@@ -5,11 +5,12 @@ const ProductionsService = {
             .from('productionweaver_productions')
             .where('owner', user_id)
     },
-    getById(knex, production_id) {
+    getById(knex, user_id, production_id) {
         return knex
             .from('productionweaver_productions')
             .select('*')
             .where('id', production_id)
+            .where('owner', user_id)
             .then(row => {
                 return row[0]
             })
