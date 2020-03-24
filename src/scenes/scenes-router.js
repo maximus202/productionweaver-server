@@ -37,6 +37,19 @@ scenesRouter
 scenesRouter
     .route('/:production_id')
     .all(requireAuth)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        const user_id = req.user_id
+        const production_id = req.params.production_id
+        ScenesService.getAllProductionScenes(knexInstance, user_id, production_id)
+            .then(scenes => {
+                if (scenes.length == 0) {
+                    res.status(400).json({ error: { message: 'No scenes found.' } })
+                }
+                res.status(200).json(scenes.map(serializeScene))
+            })
+            .catch(next)
+    })
     .post(jsonParser, (req, res, next) => {
         const { setting, location, time_of_day, short_summary } = req.body
         const production_id = req.params.production_id
