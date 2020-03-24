@@ -53,9 +53,9 @@ scenesRouter
     .post(jsonParser, (req, res, next) => {
         const { setting, location, time_of_day, short_summary } = req.body
         const production_id = req.params.production_id
-        const newScene = { setting, location, time_of_day, short_summary, production_id }
+        const owner = req.user_id
+        const newScene = { setting, location, time_of_day, short_summary, production_id, owner }
         const knexInstance = req.app.get('db')
-
         //check all inputs are in request body
         for (const [key, value] of Object.entries(newScene)) {
             if (value == null) {
@@ -63,7 +63,7 @@ scenesRouter
                     .status(400)
                     .json({
                         error: {
-                            message: 'missing input in the request body'
+                            message: `missing ${key} in the request body`
                         }
 
                     })
@@ -72,12 +72,12 @@ scenesRouter
         }
 
         //check production_id is valid
-        ProductionsService.getById(knexInstance, production_id)
+        ProductionsService.getById(knexInstance, owner, production_id)
             .then(row => {
                 if (row == null) {
                     return res
                         .status(400)
-                        .json({ error: { message: 'production_id is not valid' } })
+                        .json({ error: { message: 'production_id or owner is not valid' } })
                 }
             })
             .catch(next)
