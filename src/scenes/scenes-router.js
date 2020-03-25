@@ -50,6 +50,10 @@ scenesRouter
             })
             .catch(next)
     })
+
+scenesRouter
+    .route('/add-scene/:production_id')
+    .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
         const { setting, location, time_of_day, short_summary } = req.body
         const production_id = req.params.production_id
