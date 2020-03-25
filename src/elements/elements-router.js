@@ -22,7 +22,8 @@ elementsRouter
     .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
-        ElementsService.getAllElements(knexInstance)
+        const user_id = req.user_id
+        ElementsService.getAllElements(knexInstance, user_id)
             .then(elements => {
                 if (elements.length == 0) {
                     res
@@ -46,7 +47,8 @@ elementsRouter
     .all((req, res, next) => {
         const knexInstance = req.app.get('db')
         const element_id = req.params.element_id
-        ElementsService.getById(knexInstance, element_id)
+        const user_id = req.user_id
+        ElementsService.getById(knexInstance, element_id, user_id)
             .then(element => {
                 if (element.length == 0) {
                     return res
@@ -69,6 +71,7 @@ elementsRouter
         const { category, description } = req.body
         const element_id = req.params.element_id
         const updateElement = { category, description }
+        const user_id = req.user_id
         const knexInstance = req.app.get('db')
 
         //check all inputs are in request body
@@ -86,7 +89,7 @@ elementsRouter
             }
         }
 
-        ElementsService.updateElement(knexInstance, updateElement, element_id)
+        ElementsService.updateElement(knexInstance, updateElement, element_id, user_id)
             .then(updateElement => {
                 return res
                     .status(201)
@@ -100,9 +103,10 @@ elementsRouter
     .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
         const { category, description } = req.body
-        const newElement = { category, description }
         const production_id = req.params.production_id
         const scene_id = req.params.scene_id
+        const owner = req.user_id
+        const newElement = { category, description, production_id, scene_id, owner }
         const knexInstance = req.app.get('db')
 
         //check all inputs are in request body
@@ -121,12 +125,12 @@ elementsRouter
         }
 
         //check production_id is valid
-        ProductionsService.getById(knexInstance, production_id)
+        ProductionsService.getById(knexInstance, owner, production_id)
             .then(row => {
                 if (row == null) {
                     return res
                         .status(400)
-                        .json({ error: { message: 'production_id is not valid' } })
+                        .json({ error: { message: 'production_id or user_id is not valid' } })
                 }
             })
             .catch(next)
