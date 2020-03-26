@@ -35,7 +35,7 @@ scenesRouter
     })
 
 scenesRouter
-    .route('/:production_id')
+    .route('/production/:production_id')
     .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
@@ -47,6 +47,23 @@ scenesRouter
                     res.status(400).json({ error: { message: 'No scenes found.' } })
                 }
                 res.status(200).json(scenes.map(serializeScene))
+            })
+            .catch(next)
+    })
+
+scenesRouter
+    .route('/scene/:scene_id')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        const user_id = req.user_id
+        const scene_id = req.params.scene_id
+        ScenesService.getById(knexInstance, user_id, scene_id)
+            .then(scene => {
+                if (scene.length == 0) {
+                    res.status(400).json({ error: { message: 'Scene not found.' } })
+                }
+                res.status(200).json(scene.map(serializeScene))
             })
             .catch(next)
     })

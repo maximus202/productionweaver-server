@@ -20,10 +20,11 @@ const ScenesService = {
             .where('owner', user_id)
             .where('production_id', production_id)
     },
-    getById(knex, scene_id) {
+    getById(knex, user_id, scene_id) {
         return knex
             .select('*')
             .from('productionweaver_scenes')
+            .where('owner', user_id)
             .where('id', scene_id)
     }
 }
