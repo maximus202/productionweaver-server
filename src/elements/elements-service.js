@@ -29,7 +29,14 @@ const ElementsService = {
             .then(newRow => {
                 return newRow[0]
             })
-    }
+    },
+    getByScene(knex, user_id, scene_id) {
+        return knex
+            .select('*')
+            .from('productionweaver_elements')
+            .where('owner', user_id)
+            .where('scene_id', scene_id)
+    },
 }
 
 module.exports = ElementsService

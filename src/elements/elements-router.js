@@ -99,6 +99,31 @@ elementsRouter
     })
 
 elementsRouter
+    .route('/scene/:scene_id')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        const user_id = req.user_id
+        const scene_id = req.params.scene_id
+        ElementsService.getByScene(knexInstance, user_id, scene_id)
+            .then(elements => {
+                if (elements.length == 0) {
+                    res
+                        .status(404)
+                        .json({
+                            error: {
+                                message: 'no elements found'
+                            }
+                        })
+                }
+                res
+                    .status(200)
+                    .json(elements.map(serializeElements))
+            })
+            .catch(next)
+    })
+
+elementsRouter
     .route('/:production_id/:scene_id')
     .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
