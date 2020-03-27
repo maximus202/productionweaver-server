@@ -69,13 +69,13 @@ scenesRouter
     })
 
 scenesRouter
-    .route('/add-scene/:production_id')
+    .route('/:production_id')
     .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
-        const { setting, location, time_of_day, short_summary } = req.body
+        const { setting, scene_script_number, location, time_of_day, short_summary } = req.body
         const production_id = req.params.production_id
         const owner = req.user_id
-        const newScene = { setting, location, time_of_day, short_summary, production_id, owner }
+        const newScene = { setting, scene_script_number, location, time_of_day, short_summary, production_id, owner }
         const knexInstance = req.app.get('db')
         //check all inputs are in request body
         for (const [key, value] of Object.entries(newScene)) {
