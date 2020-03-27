@@ -13,7 +13,6 @@ const serializeElements = element => ({
     category: xss(element.category),
     description: xss(element.description),
     date_created: element.date_created,
-    production_id: xss(element.production_id),
     scene_id: xss(element.scene_id)
 })
 
@@ -122,16 +121,11 @@ elementsRouter
             })
             .catch(next)
     })
-
-elementsRouter
-    .route('/:production_id/:scene_id')
-    .all(requireAuth)
     .post(jsonParser, (req, res, next) => {
         const { category, description } = req.body
-        const production_id = req.params.production_id
         const scene_id = req.params.scene_id
         const owner = req.user_id
-        const newElement = { category, description, production_id, scene_id, owner }
+        const newElement = { category, description, scene_id, owner }
         const knexInstance = req.app.get('db')
 
         //check all inputs are in request body
@@ -149,16 +143,50 @@ elementsRouter
             }
         }
 
-        //check production_id is valid
-        ProductionsService.getById(knexInstance, owner, production_id)
+        //check scene_id is valid
+        ScenesService.getById(knexInstance, owner, scene_id)
             .then(row => {
                 if (row == null) {
                     return res
                         .status(400)
-                        .json({ error: { message: 'production_id or user_id is not valid' } })
+                        .json({ error: { message: 'service_id is not valid' } })
                 }
             })
             .catch(next)
+
+        ElementsService.insertElement(knexInstance, newElement)
+            .then(newElement => {
+                res
+                    .status(201)
+                    .json(serializeElements(newElement))
+            })
+            .catch(next)
+    })
+
+elementsRouter
+    .route('/:scene_id')
+    .all(requireAuth)
+    .post(jsonParser, (req, res, next) => {
+        const { category, description } = req.body
+        const scene_id = req.params.scene_id
+        const owner = req.user_id
+        const newElement = { category, description, scene_id, owner }
+        const knexInstance = req.app.get('db')
+
+        //check all inputs are in request body
+        for (const [key, value] of Object.entries(newElement)) {
+            if (value == null) {
+                return res
+                    .status(400)
+                    .json({
+                        error: {
+                            message: 'missing input in the request body'
+                        }
+
+                    })
+                    .catch(next)
+            }
+        }
 
         //check scene_id is valid
         ScenesService.getById(knexInstance, scene_id)
