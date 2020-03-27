@@ -10,6 +10,7 @@ const jsonParser = express.json()
 
 serializeScene = scene => ({
     id: scene.id,
+    scene_script_number: xss(scene.scene_script_number),
     setting: xss(scene.setting),
     location: xss(scene.location),
     time_of_day: xss(scene.time_of_day),
