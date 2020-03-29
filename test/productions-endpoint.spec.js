@@ -4,7 +4,7 @@ const app = require('../src/app')
 const helpers = require('./test-helpers')
 const jwt = require('jsonwebtoken')
 
-describe.only('Productions endpoint', () => {
+describe('Productions endpoint', () => {
     let db
 
     //test users
@@ -76,9 +76,6 @@ describe.only('Productions endpoint', () => {
     //new productions
     const newProductionWithNoTitle = {
         owner: 1
-    }
-    const newProductionWithNoOwner = {
-        production_title: 'Movie with no owner'
     }
     const validNewProduction = {
         production_title: 'Taxi Driver 2',
@@ -187,13 +184,6 @@ describe.only('Productions endpoint', () => {
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(newProductionWithNoTitle)
                     .expect(400, { error: { message: 'production_title missing in request body' } })
-            })
-            it('responds with 400 and an error message when owner is missing', () => {
-                return supertest(app)
-                    .post('/api/productions/')
-                    .set('Authorization', makeAuthHeader(testUsers[0]))
-                    .send(newProductionWithNoOwner)
-                    .expect(400, { error: { message: 'owner missing in request body' } })
             })
         })
         context('given a valid request', () => {

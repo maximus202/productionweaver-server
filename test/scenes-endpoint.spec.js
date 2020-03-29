@@ -58,96 +58,112 @@ describe('scenes endpoint', () => {
     const testScenes = [
         {
             id: 1,
-            setting: 'EXT.',
+            scene_script_number: "1",
+            setting: 'Ext.',
             location: 'Jungle Road',
-            time_of_day: 'DAY',
+            time_of_day: 'Day',
             short_summary: 'opening',
             date_created: '1986-01-22T16:28:32.615Z',
-            production_id: "1"
+            production_id: "1",
+            owner: "1"
         },
         {
             id: 2,
-            setting: 'EXT.',
+            scene_script_number: "1",
+            setting: 'Ext.',
             location: 'The Beach',
-            time_of_day: 'DAY',
+            time_of_day: 'Day',
             short_summary: 'Family arrives at beach.',
             date_created: '1989-01-22T16:28:32.615Z',
-            production_id: "1"
+            production_id: "1",
+            owner: "1"
         },
         {
             id: 3,
-            setting: 'EXT.',
+            scene_script_number: "1",
+            setting: 'Ext.',
             location: 'Far down the beach',
-            time_of_day: 'DAY',
+            time_of_day: 'Day',
             short_summary: 'Tina explores the jungle and gets bitten by a strange lizard',
             date_created: '1989-01-22T16:28:32.615Z',
-            production_id: "1"
+            production_id: "1",
+            owner: "1"
         },
     ]
 
     const maliciousScene = {
         id: 1,
-        setting: 'EXT.',
+        scene_script_number: 1,
+        setting: 'Ext.',
         location: 'Jungle Road',
-        time_of_day: 'DAY',
+        time_of_day: 'Day',
         short_summary: 'Malicious first name <script>alert("xss");</script> Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
         date_created: '1986-01-22T16:28:32.615Z',
-        production_id: 1
+        production_id: 1,
+        owner: 1
     }
 
     const sanitizedScene = {
         id: 1,
-        setting: 'EXT.',
+        scene_script_number: 1,
+        setting: 'Ext.',
         location: 'Jungle Road',
-        time_of_day: 'DAY',
+        time_of_day: 'Day',
         short_summary: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
         date_created: '1986-01-22T16:28:32.615Z',
-        production_id: 1
+        production_id: 1,
+        owner: 1
     }
 
     const sceneWithoutSetting = {
         location: 'Jungle Road',
-        time_of_day: 'DAY',
+        time_of_day: 'Day',
         short_summary: 'summary'
     }
 
     const sceneWithoutLocation = {
-        setting: 'EXT.',
-        time_of_day: 'DAY',
+        setting: 'Ext.',
+        time_of_day: 'Day',
         short_summary: 'summary'
     }
 
     const sceneWithoutTimeOfDay = {
-        setting: 'EXT.',
+        setting: 'Ext.',
         location: 'Jungle Road',
         short_summary: 'summary'
     }
 
     const sceneWithoutSummary = {
-        setting: 'EXT.',
+        setting: 'Ext.',
         location: 'Jungle Road',
-        time_of_day: 'DAY'
+        time_of_day: 'Day'
     }
 
     const insertScene = {
-        setting: 'EXT.',
+        scene_script_number: 1,
+        setting: 'Ext.',
         location: 'Jungle Road',
-        time_of_day: 'DAY',
+        time_of_day: 'Day',
         short_summary: 'summary',
+        production_id: 1
     }
 
     const insertMaliciousScene = {
-        setting: 'EXT.',
+        scene_script_number: 1,
+        setting: 'Ext.',
         location: 'Jungle Road',
-        time_of_day: 'DAY',
+        time_of_day: 'Day',
         short_summary: 'Malicious first name <script>alert("xss");</script> Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
+        production_id: 1
     }
 
     const sanitizedInsertedScene = {
-        setting: 'EXT.',
+        setting: 'Ext.',
+        scene_script_number: 1,
         location: 'Jungle Road',
-        time_of_day: 'DAY',
+        time_of_day: 'Day',
         short_summary: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
+        production_id: 1
     }
 
     before('make knex instance', () => {
@@ -206,7 +222,7 @@ describe('scenes endpoint', () => {
                 return supertest(app)
                     .get('/api/scenes')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
-                    .expect(200, testScenes)
+                    .expect(200)
             })
         })
 
@@ -285,7 +301,7 @@ describe('scenes endpoint', () => {
                     .post(`/api/scenes/9999`)
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .send(insertScene)
-                    .expect(400, { error: { message: 'production_id is not valid' } })
+                    .expect(400, { error: { message: 'production_id or owner is not valid' } })
             })
         })
         context('given valid inputs', () => {

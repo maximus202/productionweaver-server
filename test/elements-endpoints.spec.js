@@ -58,30 +58,36 @@ describe('Elements endpoints', () => {
     const testScenes = [
         {
             id: 1,
-            setting: 'EXT.',
+            scene_script_number: 1,
+            setting: 'Ext.',
             location: 'Jungle Road',
-            time_of_day: 'DAY',
+            time_of_day: 'Day',
             short_summary: 'opening',
             date_created: '1986-01-22T16:28:32.615Z',
-            production_id: "1"
+            production_id: "1",
+            owner: 1
         },
         {
             id: 2,
-            setting: 'EXT.',
+            scene_script_number: 1,
+            setting: 'Ext.',
             location: 'The Beach',
-            time_of_day: 'DAY',
+            time_of_day: 'Day',
             short_summary: 'Family arrives at beach.',
             date_created: '1989-01-22T16:28:32.615Z',
-            production_id: "1"
+            production_id: "1",
+            owner: 1
         },
         {
             id: 3,
-            setting: 'EXT.',
+            scene_script_number: 1,
+            setting: 'Ext.',
             location: 'Far down the beach',
-            time_of_day: 'DAY',
+            time_of_day: 'Day',
             short_summary: 'Tina explores the jungle and gets bitten by a strange lizard',
             date_created: '1989-01-22T16:28:32.615Z',
-            production_id: "1"
+            production_id: "1",
+            owner: 1
         },
     ]
 
@@ -91,24 +97,24 @@ describe('Elements endpoints', () => {
             category: 'Props',
             description: 'silverware',
             date_created: '2001-01-02T16:28:32.615Z',
-            production_id: 1,
-            scene_id: 1
+            scene_id: 1,
+            owner: 1
         },
         {
             id: 2,
             category: 'Cast',
             description: 'Bob',
             date_created: '2009-01-02T16:28:32.615Z',
-            production_id: 1,
-            scene_id: 1
+            scene_id: 1,
+            owner: 1
         },
         {
             id: 3,
             category: 'Wardrobe',
             description: 'Bob\'s suit',
             date_created: '2001-01-03T16:28:32.615Z',
-            production_id: 1,
-            scene_id: 1
+            scene_id: 1,
+            owner: 1
         },
     ]
 
@@ -117,8 +123,8 @@ describe('Elements endpoints', () => {
         category: 'Wardrobe',
         description: 'Malicious first name <script>alert("xss");</script> Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.',
         date_created: '2001-01-03T16:28:32.615Z',
-        production_id: 1,
-        scene_id: 1
+        scene_id: 1,
+        owner: 1
     }
 
     maliciousElementSanitized = {
@@ -126,8 +132,8 @@ describe('Elements endpoints', () => {
         category: 'Wardrobe',
         description: 'Malicious first name &lt;script&gt;alert(\"xss\");&lt;/script&gt; Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.',
         date_created: '2001-01-03T16:28:32.615Z',
-        production_id: 1,
-        scene_id: 1
+        scene_id: 1,
+        owner: 1
     }
 
     requestWithMissingCategory = {
@@ -181,10 +187,19 @@ describe('Elements endpoints', () => {
                     .insert(testUsers)
                     .into('productionweaver_users')
             })
-
+            beforeEach('insert productions', () => {
+                return db
+                    .insert(testProductions)
+                    .into('productionweaver_productions')
+            })
+            beforeEach('insert scenes', () => {
+                return db
+                    .insert(testScenes)
+                    .into('productionweaver_scenes')
+            })
             it('responds with 404 error and message', () => {
                 return supertest(app)
-                    .get('/api/elements')
+                    .get('/api/elements/')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(404, {
                         error: {
@@ -216,7 +231,7 @@ describe('Elements endpoints', () => {
             })
             it('responds with 200 and elements', () => {
                 return supertest(app)
-                    .get('/api/elements')
+                    .get('/api/elements/')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .then(res => {
@@ -252,7 +267,7 @@ describe('Elements endpoints', () => {
             })
             it('removes xss attack', () => {
                 return supertest(app)
-                    .get('/api/elements')
+                    .get('/api/elements/')
                     .set('Authorization', makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .then(res => {

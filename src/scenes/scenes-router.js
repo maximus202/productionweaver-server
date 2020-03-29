@@ -85,7 +85,7 @@ scenesRouter
                     .status(400)
                     .json({
                         error: {
-                            message: `missing ${key} in the request body`
+                            message: `missing input in the request body`
                         }
 
                     })

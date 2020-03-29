@@ -119,8 +119,8 @@ describe('Protected endpoints', () => {
             method: supertest(app).patch,
         },
         {
-            name: 'POST /api/elements/:production_id/:scene_id',
-            path: '/api/elements/1/1',
+            name: 'POST /api/elements/:scene_id',
+            path: '/api/elements/1',
             method: supertest(app).post,
         },
     ]
