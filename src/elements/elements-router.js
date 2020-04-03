@@ -106,15 +106,6 @@ elementsRouter
         const scene_id = req.params.scene_id
         ElementsService.getByScene(knexInstance, user_id, scene_id)
             .then(elements => {
-                /*if (elements.length == 0) {
-                    res
-                        .status(404)
-                        .json({
-                            error: {
-                                message: 'no elements found'
-                            }
-                        })
-                }*/
                 res
                     .status(200)
                     .json(elements.map(serializeElements))

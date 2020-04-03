@@ -1,26 +1,90 @@
-# Express Boilerplate!
+# ProductionWeaver
 
-This is a boilerplate project used for starting new projects!
+An application designed for independent film production management.
 
-## Set up
+## Description
 
-Complete the following steps to start a new project (NEW-PROJECT-NAME):
+Most film productions are not cheap! As the independent film movement continues to grow all over the globe, indie filmmakers are required to make vital decisions on where to skimp and where to allocate their funds, often times working with shoestring budgets.
 
-1. Clone this repository to your local machine `git clone BOILERPLATE-URL NEW-PROJECTS-NAME`
-2. `cd` into the cloned repository
-3. Make a fresh start of the git history for this project with `rm -rf .git && git init`
-4. Install the node dependencies `npm install`
-5. Move the example Environment file to `.env` that will be ignored by git and read by the express server `mv example.env .env`
-6. Edit the contents of the `package.json` to use NEW-PROJECT-NAME instead of `"name": "express-boilerplate",`
+A common frustration is the cost of quality production management software. ProductionWeaver is here to provide indie filmmakers a truly cost effective way to manage productions from script breakdown, shot listing, budgeting, etc.
+
+ProductionWeaver is currently in the early stages of development with the script breakdown feature being the first to be released.
+
+## Demo
+-  [See the live demo](https://productionweaver-app.now.sh/home)
+
+## API documentation
+Authentication: All endpoints require the use of JWT tokens which are assigned at login.
+
+### GET /api/productions/
+Gets the productions owned by the user in the JWT token.
+
+### POST /api/productions/
+Posts a new production with user in the JWT token listed as the production owner.
+
+Request body must include:
+- "first_name": string
+- "last_name": string
+- "email": string with correctly formatted email address (@domain.com)
+- "password": string
+
+### GET /api/productions/{productionId}
+Gets all details for a production based on the production id provided. 
+
+### GET /api/scenes/production/{productionId}
+Gets all scenes for a production based on the production id provided.
+
+### POST /api/scenes/{productionId}
+Posts a new scene for a production based on the production id provided.
+
+Request body must include:
+- "scene_script_number": integer
+- "setting": 'Int.' or 'Ext.' strings
+- "location": string
+- "time_of_day": string
+- "short_summary": string
+
+### GET /api/scenes/scene/{sceneId}
+Gets all details for a scene based on the scene id provided.
+
+### GET /api/elements/scene/{sceneId}
+Gets all elements for a scene based on the scene id provided.
+
+### POST /api/elements/scene/{sceneId}
+Posts a new element for a scene based on the scene id provided.
+
+Request body must include:
+- "category": string
+- "description": string
 
 ## Scripts
+- Start application for development: `npm run dev`
+- Run tests `npm test`
 
-Start the application `npm start`
+## Screenshots
 
-Start nodemon for the application `npm run dev`
+Home
+![home](https://github.com/maximus202/productionweaver-app/blob/master/public/Home.png?raw=true)
 
-Run the tests `npm test`
+Dashboard
+![dashboard](https://github.com/maximus202/productionweaver-app/blob/master/public/Dashboard.png?raw=true)
 
-## Deploying
+Production Tools
+![productiontools](https://github.com/maximus202/productionweaver-app/blob/master/public/ProductionTools.png?raw=true)
 
-When your new project is ready for deployment, add a new Heroku application with `heroku create`. This will make a new git remote called "heroku" and you can then `npm run deploy` which will push to this remote's master branch.
+Scene List
+![scenelist](https://github.com/maximus202/productionweaver-app/blob/master/public/SceneList.png?raw=true)
+
+New Scene Form
+![newscene](https://github.com/maximus202/productionweaver-app/blob/master/public/NewScene.png)
+
+Scene Breakdown
+![scenebreakdown](https://github.com/maximus202/productionweaver-app/blob/master/public/SceneBreakdown.png?raw=true)
+
+## Built With
+- Node
+- Express
+- PostgreSQL
+
+## Last updated
+April 3, 2020.
