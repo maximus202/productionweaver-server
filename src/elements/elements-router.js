@@ -1,7 +1,6 @@
 const express = require('express')
 const xss = require('xss')
 const ElementsService = require('../elements/elements-service')
-const ProductionsService = require('../productions/productions-service')
 const ScenesService = require('../scenes/scenes-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 
